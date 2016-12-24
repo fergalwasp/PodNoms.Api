@@ -17,7 +17,6 @@ namespace PodNoms.Api
                 .UseConfiguration(config)
                 .UseUrls("http://0.0.0.0:5000/")
                 .UseKestrel()
-                .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();
 

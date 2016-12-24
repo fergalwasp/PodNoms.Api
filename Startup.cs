@@ -98,7 +98,8 @@ namespace PodNoms.Api
                 Authority = $"https://{Configuration["auth0:domain"]}/",
                 Events = new JwtBearerEvents()
                 {
-                    OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
+                    OnTokenValidated = AuthenticationMiddleware.OnTokenValidated,
+                    OnAuthenticationFailed = AuthenticationMiddleware.OnAuthenticationFailed
                 }
             };
             app.UseJwtBearerAuthentication(options);

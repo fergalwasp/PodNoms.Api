@@ -41,5 +41,10 @@ namespace PodNoms.Api.Services.Auth {
             }
             return Task.FromResult(0);
         }
+
+        public static Task OnAuthenticationFailed(AuthenticationFailedContext arg)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

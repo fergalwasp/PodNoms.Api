@@ -7,7 +7,7 @@
 
   <Import Project="$(VSToolsPath)\DotNet\Microsoft.DotNet.Props" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{BB348FD4-C6C9-4B37-90D5-3D6345DE1C14}</ProjectGuid>
+    <ProjectGuid>{F5764B5C-3FCF-46A5-9F9C-8DF6D79BFF8F}</ProjectGuid>
     <RootNamespace>PodNoms.Api</RootNamespace>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'=='' ">.\obj</BaseIntermediateOutputPath>
     <OutputPath Condition="'$(OutputPath)'=='' ">.\bin\</OutputPath>
