@@ -17,6 +17,8 @@ using PodNoms.Api.Services;
 using PodNoms.Api.Services.Auth;
 using PodNoms.Api.Services.Processor;
 using PodNoms.Api.Utils.Pusher;
+using PodNoms.Api.Models.ViewModels;
+using AutoMapper;
 
 namespace PodNoms.Api
 {
@@ -52,11 +54,20 @@ namespace PodNoms.Api
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAllOrigins",
-                    builder => builder.AllowAnyOrigin()
+                    builder => builder
+                        .AllowAnyOrigin()
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
             });
+
+            //register automapper
+            var mapperConfiguration = new AutoMapper.MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<PodcastViewModel, Podcast>();
+            });
+
+            var mapper = mapperConfiguration.CreateMapper();
 
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
@@ -66,6 +77,7 @@ namespace PodNoms.Api
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddSingleton<IProcessorInterface, ProcessorInterface>();
             services.AddSingleton<IPusherService, PusherService>();
+            services.AddSingleton<IMapper>(sp => mapperConfiguration.CreateMapper());
 
             //register the codepages (required for slugify)
             var instance = CodePagesEncodingProvider.Instance;
@@ -103,9 +115,7 @@ namespace PodNoms.Api
                 }
             };
             app.UseJwtBearerAuthentication(options);
-
             app.UseCors("AllowAllOrigins");
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

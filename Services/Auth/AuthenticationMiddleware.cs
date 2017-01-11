@@ -37,7 +37,6 @@ namespace PodNoms.Api.Services.Auth {
                 };
                 userRepository.UpdateRegistration(data.EmailAddress, data.Name, data.Sid, data.UserId,
                     data.ProfileImage);
-                System.Console.WriteLine("Processed token");
             }
             return Task.FromResult(0);
         }

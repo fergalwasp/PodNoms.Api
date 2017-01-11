@@ -6,6 +6,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using PodNoms.Api.Utils.Extensions;
 using Microsoft.Extensions.Options;
+using AutoMapper;
 
 namespace PodNoms.Api.Controllers.api
 {
@@ -16,13 +17,15 @@ namespace PodNoms.Api.Controllers.api
         private readonly IPodcastRepository _podcastRepository;
         private readonly IUserRepository _userRepository;
         private readonly IOptions<AppSettings> _options;
+        private readonly IMapper _mapper;
 
         public PodcastController(IPodcastRepository podcastRepository, IUserRepository userRepository,
-            IOptions<AppSettings> options)
+            IOptions<AppSettings> options, IMapper mapper)
         {
             _podcastRepository = podcastRepository;
             _userRepository = userRepository;
             _options = options;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -51,7 +54,18 @@ namespace PodNoms.Api.Controllers.api
             if (string.IsNullOrEmpty(email) || user == null)
                 return new BadRequestObjectResult("Unable to looking user profile");
 
+            if (ModelState.IsValid)
+            {
+                var podcast = _mapper.Map<Podcast>(item);
+                var slug = item.Title.Slugify(
+                    from e in _podcastRepository.GetAll()
+                    select e.Title);
+                podcast.Slug = slug;
+                var ret = _podcastRepository.AddOrUpdate(podcast);
+                return new OkObjectResult(ret);
+            }
 
+            /*
             var merged = new Podcast
             {
                 Title = item.Title,
@@ -80,7 +94,7 @@ namespace PodNoms.Api.Controllers.api
 
                 return new OkObjectResult(podcast);
             }
-
+            */
             return BadRequest("Invalid request data");
         }
 

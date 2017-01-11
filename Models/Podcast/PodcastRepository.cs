@@ -157,6 +157,10 @@ public class PodcastRepository : IPodcastRepository
         var podcast = _context.Podcasts.FirstOrDefault(p => p.Id == id);
         if (podcast != null)
         {
+            foreach (var entry in podcast.PodcastEntries)
+            {
+                _context.Remove(entry);
+            }
             _context.Remove<Podcast>(podcast);
             return _context.SaveChanges();
         }

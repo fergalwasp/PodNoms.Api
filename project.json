@@ -31,10 +31,11 @@
         "Microsoft.AspNetCore.Identity": "1.1.0",
         "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.1.0",
         "Handlebars.NetStandard": "1.0.1",
-        "System.Text.Encoding.CodePages": "4.0.1",
+        "System.Text.Encoding.CodePages": "4.3.0",
         "IdentityServer4": "1.0.0-rc5",
         "IdentityServer4.AspNetIdentity": "1.0.0-rc5",
-        "IdentityServer4.AccessTokenValidation": "1.0.1-rc5"
+        "IdentityServer4.AccessTokenValidation": "1.0.1-rc5",
+        "AutoMapper": "5.1.1"
     },
     "tools": {
         "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.1.0-preview4-final",
