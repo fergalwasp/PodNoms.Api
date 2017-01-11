@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using PodNoms.Api.Utils.Extensions;
 using Microsoft.Extensions.Options;
 using AutoMapper;
+using System.Threading.Tasks;
 
 namespace PodNoms.Api.Controllers.api
 {
@@ -47,7 +48,7 @@ namespace PodNoms.Api.Controllers.api
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] PodcastViewModel item)
+        public async Task<ActionResult> Post([FromBody] PodcastViewModel item)
         {
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var user = _userRepository.Get(email);
@@ -57,11 +58,15 @@ namespace PodNoms.Api.Controllers.api
             if (ModelState.IsValid)
             {
                 var podcast = _mapper.Map<Podcast>(item);
-                var slug = item.Title.Slugify(
-                    from e in _podcastRepository.GetAll()
-                    select e.Title);
-                podcast.Slug = slug;
-                var ret = _podcastRepository.AddOrUpdate(podcast);
+                if (string.IsNullOrEmpty(item.Slug))
+                {
+                    var slug = item.Title.Slugify(
+                        from e in _podcastRepository.GetAll()
+                        select e.Title);
+                    podcast.Slug = slug;
+                }
+                podcast.User = user;
+                var ret = await _podcastRepository.AddOrUpdate(podcast);
                 return new OkObjectResult(ret);
             }
 

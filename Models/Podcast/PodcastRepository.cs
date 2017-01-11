@@ -64,7 +64,7 @@ public class PodcastRepository : IPodcastRepository
             item.ImageUrl = await ImageUtils.GetRemoteImageAsBase64($"http://lorempixel.com/400/200/?{System.Guid.NewGuid().ToString()}");
             _context.Podcasts.Add(item);
         }
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
         return item;
     }
 
