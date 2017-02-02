@@ -38,6 +38,7 @@ namespace PodNoms.Api.Controllers.api
                 entry.Title = result.Title;
                 entry.Slug = slug;
                 entry.Description = result.Description;
+                entry.Processed = true;
             }
             _podcastRepository.AddOrUpdateEntry(entry);
 
@@ -45,14 +46,13 @@ namespace PodNoms.Api.Controllers.api
             var pusherResult = _pusherService.Trigger(
                 new PusherMessage
                 {
-                    name = "audio_processed",
-                    channel = "jobs_channel",
+                    name = "audio-processed",
+                    channel = "jobs-channel",
                     data = new PusherPayload
                     {
-                        message = "hello world"
+                        message = result.Uid
                     }
                 });
-            //new { message = "hello world" } );
             return result;
         }
     }

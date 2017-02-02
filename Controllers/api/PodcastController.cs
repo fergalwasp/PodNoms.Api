@@ -54,7 +54,7 @@ namespace PodNoms.Api.Controllers.api
             var user = _userRepository.Get(email);
             if (string.IsNullOrEmpty(email) || user == null)
                 return new BadRequestObjectResult("Unable to looking user profile");
-
+            //Hello Sailor
             if (ModelState.IsValid)
             {
                 var podcast = _mapper.Map<Podcast>(item);
@@ -66,40 +66,9 @@ namespace PodNoms.Api.Controllers.api
                     podcast.Slug = slug;
                 }
                 podcast.User = user;
-                var ret = await _podcastRepository.AddOrUpdate(podcast);
+                var ret = await _podcastRepository.AddOrUpdateAsync(podcast);
                 return new OkObjectResult(ret);
             }
-
-            /*
-            var merged = new Podcast
-            {
-                Title = item.Title,
-                Description = item.Description ?? "",
-                ImageUrl = item.ImageUrl ?? "",
-                CreateDate = System.DateTime.Now,
-                UpdateDate = System.DateTime.Now,
-                User = user
-            };
-            if (item.Id != null && item.Id != -1)
-            {
-                var podcast = _podcastRepository.Get((int) item.Id);
-                if (podcast != null)
-                {
-                    _podcastRepository.AddOrUpdate(podcast);
-                    return new OkObjectResult(podcast);
-                }
-            }
-            else if (item != null && !string.IsNullOrEmpty(item.Title))
-            {
-                var slug = item.Title.Slugify(
-                    from e in _podcastRepository.GetAll()
-                    select e.Title);
-                merged.Slug = slug;
-                var podcast = _podcastRepository.AddOrUpdate(merged);
-
-                return new OkObjectResult(podcast);
-            }
-            */
             return BadRequest("Invalid request data");
         }
 

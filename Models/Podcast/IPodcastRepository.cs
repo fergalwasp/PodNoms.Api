@@ -9,7 +9,7 @@ namespace PodNoms.Api.Models
         IEnumerable<Podcast> GetAll(string UserId);
         Podcast Get(int id);
         Podcast Get(string slug);
-        Task<Podcast> AddOrUpdate(Podcast item);
+        Task<Podcast> AddOrUpdateAsync(Podcast item);
         string UpdateImageData(int PodcastId, string ImageData);
 
         IEnumerable<PodcastEntry> GetAllEntries(int PodcastId);

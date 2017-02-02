@@ -5,6 +5,7 @@ namespace PodNoms.Api.Models.ViewModels
     public class PodcastEntryViewModel
     {
         public int Id { get; set; }
+        public string Uid { get; set; }
         public int PodcastId { get; set; }
         public string Author { get; set; }
         public string Title { get; set; }
@@ -15,5 +16,6 @@ namespace PodNoms.Api.Models.ViewModels
         public long AudioFileSize { get; set; }
         public string SourceUrl { get; set; }
         public DateTime CreateDate { get; set; }
+        public bool Processed { get; set; }
     }
 }

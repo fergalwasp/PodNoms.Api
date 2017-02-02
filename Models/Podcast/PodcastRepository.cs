@@ -53,11 +53,12 @@ public class PodcastRepository : IPodcastRepository
         return ret;
     }
 
-    public async Task<Podcast> AddOrUpdate(Podcast item)
+    public async Task<Podcast> AddOrUpdateAsync(Podcast item)
     {
         if (item.Id != 0)
         {
             _context.Podcasts.Attach(item);
+            _context.Entry(item).State = EntityState.Modified;
         }
         else
         {
@@ -157,9 +158,12 @@ public class PodcastRepository : IPodcastRepository
         var podcast = _context.Podcasts.FirstOrDefault(p => p.Id == id);
         if (podcast != null)
         {
-            foreach (var entry in podcast.PodcastEntries)
+            if (podcast.PodcastEntries != null)
             {
-                _context.Remove(entry);
+                foreach (var entry in podcast.PodcastEntries)
+                {
+                    _context.Remove(entry);
+                }
             }
             _context.Remove<Podcast>(podcast);
             return _context.SaveChanges();

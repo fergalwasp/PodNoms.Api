@@ -21,7 +21,7 @@ namespace PodNoms.Api.Services.Processor
             var body = JsonConvert.SerializeObject(new {
                 url = url,
                 id = id,
-                callbackUrl = callbackUrl
+                callback_url = callbackUrl
             });
             var path = "/api/processor";
             _logger.LogDebug($"Submitting to processor: {path}");

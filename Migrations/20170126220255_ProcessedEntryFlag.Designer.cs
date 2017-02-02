@@ -8,9 +8,10 @@ using PodNoms.Api.Models;
 namespace PodNoms.Api.Migrations
 {
     [DbContext(typeof(PodnomsContext))]
-    partial class PodnomsContextModelSnapshot : ModelSnapshot
+    [Migration("20170126220255_ProcessedEntryFlag")]
+    partial class ProcessedEntryFlag
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.0-rtm-22752")

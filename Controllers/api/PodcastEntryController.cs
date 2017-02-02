@@ -28,10 +28,15 @@ namespace PodNoms.Api.Controllers.api
             _logger = loggerFactory.CreateLogger<ManageController>();
         }
 
-        [HttpGet]
-        public IActionResult GetAll(int podcastId)
+        [HttpGet("{uid}")]
+        public IActionResult Get(string uid){
+            return new OkObjectResult(_repository.GetEntryByUid(uid));
+        }
+
+        [HttpGet("{podcastId:int}")]
+        public IActionResult Get(int id)
         {
-            return new OkObjectResult(_repository.GetAllEntries(podcastId));
+            return new OkObjectResult(_repository.GetEntry(id));
         }
 
         [HttpPost]
@@ -53,7 +58,7 @@ namespace PodNoms.Api.Controllers.api
                 var entry = new PodcastEntry
                 {
                     Author = item.Author,
-                    Uid = System.Guid.NewGuid().ToString(),
+                    Uid = item.Uid,
                     Title = item.Title,
                     Description = item.Description,
                     Slug = slug,
