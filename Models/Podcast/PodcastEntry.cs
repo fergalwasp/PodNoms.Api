@@ -15,6 +15,7 @@ namespace PodNoms.Api.Models
         public float AudioLength { get; set; }
         public long AudioFileSize { get; set; }
         public string ImageUrl { get; set; }
+        public string ProcessingPayload { get; set; }
         public bool Processed { get; set; }
         [IgnoreDataMember]
         public virtual Podcast Podcast { get; set; }
