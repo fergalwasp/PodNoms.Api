@@ -2,11 +2,11 @@
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using PodNoms.Api.Models;
 
-namespace PodNoms.Api.Services.Auth {
+namespace PodNoms.Api.Services.Auth
+{
     public class AuthenticationMiddleware {
         private readonly IUserRepository _userRepository;
         private readonly ILogger<AuthenticationMiddleware> _logger;

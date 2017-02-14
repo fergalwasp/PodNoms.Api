@@ -13,7 +13,7 @@ namespace PodNoms.Api.Models
         string UpdateImageData(int PodcastId, string ImageData);
 
         IEnumerable<PodcastEntry> GetAllEntries(int PodcastId);
-        IEnumerable<PodcastEntry> __getAllEntries();
+        IEnumerable<PodcastEntry> GetAllEntries();
         PodcastEntry GetEntry(int id);
         PodcastEntry GetEntry(string slug);
         PodcastEntry GetEntryByUid(string uid);
@@ -22,7 +22,6 @@ namespace PodNoms.Api.Models
         int Delete(int id);
         int DeleteEntry(int id);
         int DeleteEntry(string slug);
-
-
+        List<PodcastEntry> GetEntryByStatus(ProcessingStatus status);
     }
 }

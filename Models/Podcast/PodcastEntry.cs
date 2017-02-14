@@ -1,9 +1,14 @@
 using System.Runtime.Serialization;
 
-namespace PodNoms.Api.Models
-{
-    public class PodcastEntry : BaseModel
-    {
+namespace PodNoms.Api.Models {
+    public enum ProcessingStatus {
+        Waiting,
+        Accepted,
+        Processing,
+        Processed
+    }
+    public class PodcastEntry : BaseModel {
+
         public int Id { get; set; }
         public string Uid { get; set; }
         public string Author { get; set; }
@@ -16,6 +21,7 @@ namespace PodNoms.Api.Models
         public long AudioFileSize { get; set; }
         public string ImageUrl { get; set; }
         public string ProcessingPayload { get; set; }
+        public ProcessingStatus ProcessingStatus { get; set; }
         public bool Processed { get; set; }
         [IgnoreDataMember]
         public virtual Podcast Podcast { get; set; }

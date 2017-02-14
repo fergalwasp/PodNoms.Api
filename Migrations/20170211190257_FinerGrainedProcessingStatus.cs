@@ -1,22 +1,24 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace PodNoms.Api.Migrations
 {
-    public partial class ProcessedEntryFlag : Migration
+    public partial class FinerGrainedProcessingStatus : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "Processed",
+            migrationBuilder.AddColumn<int>(
+                name: "ProcessingStatus",
                 table: "PodcastEntries",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: 0);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Processed",
+                name: "ProcessingStatus",
                 table: "PodcastEntries");
         }
     }

@@ -17,5 +17,6 @@ namespace PodNoms.Api.Models.ViewModels
         public string SourceUrl { get; set; }
         public DateTime CreateDate { get; set; }
         public bool Processed { get; set; }
+
     }
 }

@@ -5,31 +5,22 @@ using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Utils.Extensions;
 using PodNoms.Api.Utils.Pusher;
 
-namespace PodNoms.Api.Controllers.api
-{
+namespace PodNoms.Api.Controllers.api {
     [Route("api/[controller]")]
-    public class ProcessResultController : Controller
-    {
+    public class ProcessResultController : Controller {
         private readonly IPodcastRepository _podcastRepository;
         private readonly IPusherService _pusherService;
-        public ProcessResultController(IPodcastRepository repository, IPusherService pusherService)
-        {
+        public ProcessResultController(IPodcastRepository repository, IPusherService pusherService) {
             _podcastRepository = repository;
             _pusherService = pusherService;
         }
 
         [HttpPost]
-        public ProcessAudioResultViewModel ProcessResult(ProcessAudioResultViewModel result)
-        {
+        public ProcessAudioResultViewModel ProcessResult(ProcessAudioResultViewModel result) {
             var entry = _podcastRepository.GetEntryByUid(result.Uid);
-            var slug = result.Title.Slugify(
-                from e in
-                    this._podcastRepository.GetAllEntries(entry.Id)
-                select e.Title);
+            var slug = result.Title.Slugify(_podcastRepository.GetAllEntries().Select(e => e.Title));
 
-
-            if (entry != null)
-            {
+            if (entry != null) {
                 entry.Author = result.Author;
                 entry.ImageUrl = result.ImageUrl;
                 entry.AudioUrl = result.AudioUrl;
@@ -44,14 +35,12 @@ namespace PodNoms.Api.Controllers.api
 
             //send realtime event (currently pusher)
             var pusherResult = _pusherService.Trigger(
-                new PusherMessage
-                {
+                new PusherMessage {
                     name = "audio-processed",
-                    channel = "jobs-channel",
-                    data = new PusherPayload
-                    {
-                        message = result.Uid
-                    }
+                        channel = "jobs-channel",
+                        data = new PusherPayload {
+                            message = result.Uid
+                        }
                 });
             return result;
         }
