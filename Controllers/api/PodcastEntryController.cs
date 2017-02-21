@@ -1,32 +1,31 @@
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Services.Processor;
-using PodNoms.Api.Utils.Extensions;
-using Polly;
 
 namespace PodNoms.Api.Controllers.api {
     [Route("api/[controller]")]
     public class PodcastEntryController : Controller {
         private readonly IPodcastRepository _repository;
-        private readonly IProcessorInterface _processor;
         private readonly ILogger _logger;
         private readonly IOptions<AppSettings> _options;
+        private readonly IProcessorRetryClient _processorRetryClient;
+        private readonly IMapper _mapper;
 
         public PodcastEntryController(IPodcastRepository repository,
-            IProcessorInterface processor,
+            IProcessorRetryClient processorRetryClient,
             ILoggerFactory loggerFactory,
-            IOptions<AppSettings> options) {
+            IOptions<AppSettings> options,
+            IMapper mapper) {
             _repository = repository;
-            _processor = processor;
+            _processorRetryClient = processorRetryClient;
             _options = options;
-            _logger = loggerFactory.CreateLogger<ManageController> ();
+            _logger = loggerFactory.CreateLogger<PodcastEntryController> ();
+            _mapper = mapper;
         }
 
         [HttpGet("{uid}")]
@@ -51,52 +50,37 @@ namespace PodNoms.Api.Controllers.api {
             return Ok(entries);
         }
 
+        [HttpPost("resend")]
+        public async Task<IActionResult> Resend([FromBody] PodcastEntryViewModel item) {
+            if (!string.IsNullOrEmpty(item.Uid)) {
+                await _processorRetryClient.StartRetryLoop(item.SourceUrl, item.Uid);
+                return Ok(item);
+            }
+            return BadRequest(item);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] PodcastEntryViewModel item) {
             if (item != null && !string.IsNullOrEmpty(item.SourceUrl)) {
                 if (string.IsNullOrEmpty(item.Title))
                     item.Title = item.SourceUrl;
-
-                var entry = new PodcastEntry {
-                    Author = item.Author,
-                        Uid = item.Uid,
-                        Title = item.Title,
-                        Description = item.Description,
-                        ImageUrl = item.ImageUrl,
-                        SourceUrl = item.SourceUrl,
-                        AudioUrl = item.AudioUrl,
-                        Processed = false,
-                        ProcessingStatus = ProcessingStatus.Waiting,
-                        CreateDate = System.DateTime.Now
-                };
+                var entry = _mapper.Map < PodcastEntryViewModel,
+                    PodcastEntry > (item, o => {
+                        o.AfterMap((src, dest) => {
+                            dest.Processed = false;
+                            dest.ProcessingStatus = ProcessingStatus.Waiting;
+                            dest.CreateDate = System.DateTime.Now;
+                        });
+                    });
                 entry = this._repository.AddEntry(item.PodcastId, entry);
                 if (entry != null) {
-                    var callbackAddress = $"{_options.Value.SiteUrl}/api/processresult";
-
-                    var processorResult = await _processor.SubmitNewAudioItem(
-                        item.SourceUrl,
-                        entry.Uid,
-                        callbackAddress);
-                    try {
-                        if (processorResult.StatusCode == HttpStatusCode.OK) {
-                            entry.ProcessingStatus = ProcessingStatus.Accepted;
-                            this._repository.AddOrUpdateEntry(entry);
-                            return Ok(entry);
-                        }
-                    } catch (HttpRequestException ex) {
-                        var retryPolicy = Policy.Handle<HttpRequestException> ().Retry(15);
-                        await retryPolicy.Execute(async() => {
-                            processorResult = await _processor.SubmitNewAudioItem(
-                                item.SourceUrl,
-                                entry.Uid,
-                                callbackAddress);
-                            if (processorResult.StatusCode == HttpStatusCode.OK) {
-                                entry.ProcessingStatus = ProcessingStatus.Accepted;
-                                this._repository.AddOrUpdateEntry(entry);
-                            }
-                        });
-                        return Accepted(entry);
-                    }
+                    var result = Task.Run(() => {
+                        _processorRetryClient.StartRetryLoop(item.SourceUrl, entry.Uid);
+                    }).ContinueWith(r => {
+                        entry.ProcessingStatus = ProcessingStatus.Accepted;
+                        this._repository.AddOrUpdateEntry(entry);
+                    });
+                    return Accepted(entry);
                 }
             }
             return BadRequest("Invalid request data");
@@ -117,6 +101,5 @@ namespace PodNoms.Api.Controllers.api {
             }
             return new NotFoundResult();
         }
-
     }
 }

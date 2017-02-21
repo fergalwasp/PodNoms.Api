@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using PodNoms.Api.Models;
 using PodNoms.Api.Utils;
+using PodNoms.Api.Utils.Extensions;
 
 public class PodcastRepository : IPodcastRepository {
     private readonly PodnomsContext _context;
@@ -125,11 +126,13 @@ public class PodcastRepository : IPodcastRepository {
         return null;
     }
     public PodcastEntry AddOrUpdateEntry(PodcastEntry entry) {
+        if (string.IsNullOrEmpty(entry.Slug) && !string.IsNullOrEmpty(entry.Title)) {
+            entry.Slug = entry.Title.Slugify(GetAllEntries().Select(e => e.Title));
+        }
         if (entry.Id != 0) {
             _context.PodcastEntries.Attach(entry);
         } else {
             _context.PodcastEntries.Add(entry);
-
         }
         _context.SaveChanges();
         return entry;

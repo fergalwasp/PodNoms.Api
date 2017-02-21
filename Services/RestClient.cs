@@ -1,5 +1,4 @@
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -8,7 +7,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PodNoms.Api.Models;
 
-namespace PodNoms.Api.Services {
+namespace PodNoms.Api.Services
+{
     public abstract class RestClient {
         HttpClientHandler ____proxy_handler___;
         private readonly IOptions<AppSettings> _options;
