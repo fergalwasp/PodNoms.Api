@@ -53,7 +53,11 @@ namespace PodNoms.Api.Controllers.api {
         [HttpPost("resend")]
         public async Task<IActionResult> Resend([FromBody] PodcastEntryViewModel item) {
             if (!string.IsNullOrEmpty(item.Uid)) {
-                await _processorRetryClient.StartRetryLoop(item.SourceUrl, item.Uid);
+                var result = Task.Run(() => {
+                    _processorRetryClient.StartRetryLoop(item.SourceUrl, item.Uid);
+                }).ContinueWith(e => _logger.LogDebug($"Retry loop exited: {e}"));
+
+                var entry = await _repository.GetEntryAsync(item.Id);
                 return Ok(item);
             }
             return BadRequest(item);
@@ -62,8 +66,6 @@ namespace PodNoms.Api.Controllers.api {
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] PodcastEntryViewModel item) {
             if (item != null && !string.IsNullOrEmpty(item.SourceUrl)) {
-                if (string.IsNullOrEmpty(item.Title))
-                    item.Title = item.SourceUrl;
                 var entry = _mapper.Map < PodcastEntryViewModel,
                     PodcastEntry > (item, o => {
                         o.AfterMap((src, dest) => {
@@ -72,7 +74,7 @@ namespace PodNoms.Api.Controllers.api {
                             dest.CreateDate = System.DateTime.Now;
                         });
                     });
-                entry = this._repository.AddEntry(item.PodcastId, entry);
+                entry = await this._repository.AddEntryAsync(item.PodcastId, entry);
                 if (entry != null) {
                     var result = Task.Run(() => {
                         _processorRetryClient.StartRetryLoop(item.SourceUrl, entry.Uid);

@@ -3,7 +3,6 @@ namespace PodNoms.Api.Models.ViewModels
     public class ProcessAudioResultViewModel
     {
         public string Uid { get; set; }
-        public bool Success { get; set; }
         public string Author { get; set; }
         public string AudioUrl { get; set; }
         public float AudioLength { get; set; }
@@ -11,5 +10,7 @@ namespace PodNoms.Api.Models.ViewModels
         public string ImageUrl { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public string Payload { get; set; }
+        public bool Processed { get; internal set; }
     }
 }

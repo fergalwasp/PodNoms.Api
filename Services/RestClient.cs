@@ -45,7 +45,6 @@ namespace PodNoms.Api.Services
                 if (result.IsSuccessStatusCode) {
                     _logger.LogDebug($"RestClient: Result from processor: {result.StatusCode}");
                 } else {
-                    _logger.LogDebug($"RestClient: Error sending to processor: {result.StatusCode}\n{result.ReasonPhrase}");
                     _logger.LogError($"RestClient: Error sending to processor: {result.StatusCode}\n{result.ReasonPhrase}");
                 }
                 _logger.LogDebug("RestClient: Returning");

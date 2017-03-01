@@ -10,7 +10,10 @@ using Polly;
 namespace PodNoms.Api.Services.Processor {
     public interface IProcessorRetryClient {
         Task<bool> SubmitProcessorRequest(string url, string uid);
-        Task<bool> StartRetryLoop(string url, string uid);
+
+        Policy GetRetryPolicy();
+        void StartRetryLoop(string url, string uid);
+        Task<bool> StartRetryLoopAsync(string url, string uid);
     }
 
     public class ProcessorRetryClient : IProcessorRetryClient {
@@ -32,36 +35,34 @@ namespace PodNoms.Api.Services.Processor {
                 _callbackAddress);
             return result.StatusCode == HttpStatusCode.Accepted;
         }
-        public async Task<bool> StartRetryLoop(string url, string uid) {
-            try {
-                //first submit the request
-                await SubmitProcessorRequest(url, uid);
-            } catch (HttpRequestException) {
-                //if failed, enter retry loop
-                _logger.LogDebug("Unable to connect to job server, starting retry cycle.");
-                int a = 1;
-                try {
-                    await Policy.Handle<HttpRequestException> ()
-                        .WaitAndRetryAsync(10, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)))
-                        .ExecuteAsync(async() => {
-                            _logger.LogDebug($"Submitting retry: {a++} next wait: {Math.Pow(2, a)} secs");
-                            var result = await _processor.SubmitNewAudioItem(
-                                url,
-                                uid,
-                                _callbackAddress);
-                            if (result.StatusCode == HttpStatusCode.OK) {
-                                _logger.LogDebug("Job server responded");
-                            } else {
-                                _logger.LogDebug("Job server did not respond");
-                            }
-                        });
-                } catch (InvalidOperationException ex) {
-                    _logger.LogError($"Polly doesn't want a cracker: {ex.Message}");
-                } catch (Exception ex) {
-                    _logger.LogError($"Polly doesn't want a cracker: {ex.Message}");
+
+        public Policy GetRetryPolicy() {
+            // in total we will make 3 attempts
+            //.WaitAndRetryAsync(10, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)))
+            return Policy
+                .Handle<Exception> ()
+                .WaitAndRetryAsync(10, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
+                    (ex, retryCount) =>
+                    _logger.LogWarning($"Unable to connect to Job Server. Retry attempt {retryCount}. {ex}"));
+        }
+        public void StartRetryLoop(string url, string uid) {
+            StartRetryLoopAsync(url, uid)
+                .ContinueWith(r => _logger.LogDebug("Done"));
+        }
+        public async Task<bool> StartRetryLoopAsync(string url, string uid) {
+            return await GetRetryPolicy().ExecuteAsync(async() => {
+                var result = await _processor.SubmitNewAudioItem(
+                    url,
+                    uid,
+                    _callbackAddress);
+                if (result.StatusCode == HttpStatusCode.OK) {
+                    _logger.LogDebug("Job server responded");
+                    return true;
+                } else {
+                    _logger.LogDebug("Job server did not respond");
                 }
-            }
-            return false;
+                return false;
+            });
         }
     }
 }

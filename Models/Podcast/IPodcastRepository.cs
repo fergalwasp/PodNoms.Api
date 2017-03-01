@@ -18,10 +18,13 @@ namespace PodNoms.Api.Models
         PodcastEntry GetEntry(string slug);
         PodcastEntry GetEntryByUid(string uid);
         PodcastEntry AddEntry(int PodcastId, PodcastEntry item);
+        Task<PodcastEntry> AddEntryAsync(int PodcastId, PodcastEntry item);
         PodcastEntry AddOrUpdateEntry(PodcastEntry item);
+        Task<PodcastEntry> AddOrUpdateEntryAsync(PodcastEntry item);
         int Delete(int id);
         int DeleteEntry(int id);
         int DeleteEntry(string slug);
         List<PodcastEntry> GetEntryByStatus(ProcessingStatus status);
+        Task<PodcastEntry> GetEntryAsync(int id);
     }
 }

@@ -16,11 +16,11 @@ namespace PodNoms.Api.Services.Processor
 
         }
 
-        public async Task<HttpResponseMessage> SubmitNewAudioItem(string url, string id, string callbackUrl)
+        public async Task<HttpResponseMessage> SubmitNewAudioItem(string url, string uid, string callbackUrl)
         {
             var body = JsonConvert.SerializeObject(new {
                 url = url,
-                id = id,
+                id = uid,
                 callback_url = callbackUrl
             });
             var path = "/api/processor";

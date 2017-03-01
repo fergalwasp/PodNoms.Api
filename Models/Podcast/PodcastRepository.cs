@@ -90,6 +90,15 @@ public class PodcastRepository : IPodcastRepository {
             .FirstOrDefault();
         return entry;
     }
+
+    public async Task<PodcastEntry> GetEntryAsync(int id) {
+        var entry = await _context.PodcastEntries
+            .Where(e => e.Id == id)
+            .Include(p => p.Podcast)
+            .FirstOrDefaultAsync();
+        return entry;
+    }
+    
     public PodcastEntry GetEntry(string slug) {
         var entry = _context.PodcastEntries
             .Where(e => e.Slug == slug)
@@ -125,6 +134,21 @@ public class PodcastRepository : IPodcastRepository {
         }
         return null;
     }
+    public async Task<PodcastEntry> AddEntryAsync(int PodcastId, PodcastEntry item) {
+        var podcast = _context.Podcasts
+            .FirstOrDefault(p => p.Id == PodcastId);
+
+        if (podcast != null) {
+            if (podcast.PodcastEntries == null) {
+                podcast.PodcastEntries = new List<PodcastEntry> ();
+            }
+
+            podcast.PodcastEntries.Add(item);
+            await _context.SaveChangesAsync();
+            return item;
+        }
+        return null;
+    }
     public PodcastEntry AddOrUpdateEntry(PodcastEntry entry) {
         if (string.IsNullOrEmpty(entry.Slug) && !string.IsNullOrEmpty(entry.Title)) {
             entry.Slug = entry.Title.Slugify(GetAllEntries().Select(e => e.Title));
@@ -135,6 +159,18 @@ public class PodcastRepository : IPodcastRepository {
             _context.PodcastEntries.Add(entry);
         }
         _context.SaveChanges();
+        return entry;
+    }
+    public async Task<PodcastEntry> AddOrUpdateEntryAsync(PodcastEntry entry) {
+        if (string.IsNullOrEmpty(entry.Slug) && !string.IsNullOrEmpty(entry.Title)) {
+            entry.Slug = entry.Title.Slugify(GetAllEntries().Select(e => e.Title));
+        }
+        if (entry.Id != 0) {
+            _context.PodcastEntries.Attach(entry);
+        } else {
+            _context.PodcastEntries.Add(entry);
+        }
+        await _context.SaveChangesAsync();
         return entry;
     }
 

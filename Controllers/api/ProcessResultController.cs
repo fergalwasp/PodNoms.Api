@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PodNoms.Api.Models;
@@ -7,22 +8,28 @@ using PodNoms.Api.Utils.Pusher;
 namespace PodNoms.Api.Controllers.api
 {
     [Route("api/[controller]")]
-    public class ProcessResultController : Controller {
+    public class ProcessResultController : Controller
+    {
         private readonly IPodcastRepository _podcastRepository;
         private readonly IPusherService _pusherService;
         private readonly ILogger<ProcessResultController> _logger;
 
-        public ProcessResultController(IPodcastRepository repository, IPusherService pusherService, ILoggerFactory loggerFactory) {
+        public ProcessResultController(IPodcastRepository repository, IPusherService pusherService, ILoggerFactory loggerFactory)
+        {
             _podcastRepository = repository;
             _pusherService = pusherService;
-            _logger = loggerFactory.CreateLogger<ProcessResultController> ();
+            _logger = loggerFactory.CreateLogger<ProcessResultController>();
         }
 
         [HttpPost]
-        public IActionResult ProcessResult(ProcessAudioResultViewModel result) {
+        public IActionResult ProcessResult(ProcessAudioResultViewModel result)
+        {
             var entry = _podcastRepository.GetEntryByUid(result.Uid);
 
-            if (entry != null) {
+            if (entry != null)
+            {
+
+                Debug.Assert(!entry.Processed);
                 entry.Author = result.Author;
                 entry.ImageUrl = result.ImageUrl;
                 entry.AudioUrl = result.AudioUrl;
@@ -30,17 +37,22 @@ namespace PodNoms.Api.Controllers.api
                 entry.AudioFileSize = result.AudioFileSize;
                 entry.Title = result.Title;
                 entry.Description = result.Description;
-                entry.Processed = true;
+                entry.ProcessingPayload = result.Payload;
+                entry.Processed = result.Processed;
+                entry.ProcessingStatus = result.Processed ? ProcessingStatus.Processed : ProcessingStatus.Processing;
+
                 _podcastRepository.AddOrUpdateEntry(entry);
 
                 //send realtime event (currently pusher)
                 var pusherResult = _pusherService.Trigger(
-                    new PusherMessage {
+                    new PusherMessage
+                    {
                         name = "audio-processed",
-                            channel = "jobs-channel",
-                            data = new PusherPayload {
-                                message = result.Uid
-                            }
+                        channel = "jobs-channel",
+                        data = new PusherPayload
+                        {
+                            message = result.Uid
+                        }
                     });
                 return Ok(result);
             }
