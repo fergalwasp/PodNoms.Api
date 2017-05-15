@@ -10,7 +10,6 @@ using Polly;
 namespace PodNoms.Api.Services.Processor {
     public interface IProcessorRetryClient {
         Task<bool> SubmitProcessorRequest(string url, string uid, string callbackAddress);
-
         Policy GetRetryPolicy();
         void StartRetryLoop(string url, string uid, string callbackAddress);
         Task<bool> StartRetryLoopAsync(string url, string uid, string callbackAddress);
@@ -23,7 +22,7 @@ namespace PodNoms.Api.Services.Processor {
 
         public ProcessorRetryClient(IProcessorInterface processor, ILoggerFactory loggerFactory, IOptions<AppSettings> options) {
             _processor = processor;
-            _logger = loggerFactory.CreateLogger<ProcessorRetryClient> ();
+            _logger = loggerFactory.CreateLogger<ProcessorRetryClient>();
             _options = options;
         }
         public async Task<bool> SubmitProcessorRequest(string url, string uid, string callbackAddress) {
@@ -38,7 +37,7 @@ namespace PodNoms.Api.Services.Processor {
             // in total we will make 3 attempts
             //.WaitAndRetryAsync(10, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)))
             return Policy
-                .Handle<Exception> ()
+                .Handle<Exception>()
                 .WaitAndRetryAsync(10, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt)),
                     (ex, retryCount) =>
                     _logger.LogWarning($"Unable to connect to Job Server. Retry attempt {retryCount}. {ex}"));

@@ -1,7 +1,5 @@
-namespace PodNoms.Api.Models.ViewModels
-{
-    public class ProcessAudioResultViewModel
-    {
+namespace PodNoms.Api.Models.ViewModels {
+    public class ProcessAudioResultViewModel {
         public string Uid { get; set; }
         public string Author { get; set; }
         public string AudioUrl { get; set; }

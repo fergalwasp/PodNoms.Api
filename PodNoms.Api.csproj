@@ -25,6 +25,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="hangfire" Version="1.6.12" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="1.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Routing" Version="1.1.0" />
@@ -52,6 +53,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="1.1.0" />
     <PackageReference Include="Handlebars.NetStandard" Version="1.0.1" />
+    <PackageReference Include="NYoutubeDL" Version="0.4.3" />
+    <PackageReference Include="Polly" Version="5.1.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0" />
     <PackageReference Include="AutoMapper" Version="5.1.1" />
   </ItemGroup>

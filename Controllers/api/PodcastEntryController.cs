@@ -1,12 +1,14 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Services.Processor;
+using PodNoms.Api.Services.Processor.Hangfire;
 
 namespace PodNoms.Api.Controllers.api {
     [Route("api/[controller]")]
@@ -28,7 +30,7 @@ namespace PodNoms.Api.Controllers.api {
             _processorRetryClient = processorRetryClient;
             _processor = processorInterface;
             _options = options;
-            _logger = loggerFactory.CreateLogger<PodcastEntryController> ();
+            _logger = loggerFactory.CreateLogger<PodcastEntryController>();
             _mapper = mapper;
         }
 
@@ -84,8 +86,7 @@ namespace PodNoms.Api.Controllers.api {
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] PodcastEntryViewModel item) {
             if (item != null && !string.IsNullOrEmpty(item.SourceUrl)) {
-                var entry = _mapper.Map < PodcastEntryViewModel,
-                    PodcastEntry > (item, o => {
+                var entry = _mapper.Map<PodcastEntryViewModel, PodcastEntry>(item, o => {
                         o.AfterMap((src, dest) => {
                             dest.Processed = false;
                             dest.ProcessingStatus = ProcessingStatus.Waiting;
@@ -94,15 +95,7 @@ namespace PodNoms.Api.Controllers.api {
                     });
                 entry = await this._repository.AddEntryAsync(item.PodcastId, entry);
                 if (entry != null) {
-                    var result = Task.Run(() => {
-                        _processorRetryClient.StartRetryLoop(
-                            item.SourceUrl,
-                            entry.Uid,
-                            $"{_options.Value.SiteUrl}/api/processresult");
-                    }).ContinueWith(r => {
-                        entry.ProcessingStatus = ProcessingStatus.Accepted;
-                        this._repository.AddOrUpdateEntry(entry);
-                    });
+                    BackgroundJob.Enqueue<IUrlProcessService>(service => service.ProcessUrl(item.SourceUrl));
                     return Accepted(entry);
                 }
             }
