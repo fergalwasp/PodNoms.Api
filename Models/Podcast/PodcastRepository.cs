@@ -98,7 +98,7 @@ public class PodcastRepository : IPodcastRepository {
             .FirstOrDefaultAsync();
         return entry;
     }
-    
+
     public PodcastEntry GetEntry(string slug) {
         var entry = _context.PodcastEntries
             .Where(e => e.Slug == slug)
@@ -112,6 +112,12 @@ public class PodcastRepository : IPodcastRepository {
         return entry;
     }
 
+    public async Task<List<PodcastEntry>> GetQueuedEntriesAsync() {
+        var results = await _context.PodcastEntries
+            .Where(e => e.Processed == false)
+            .ToListAsync();
+        return results;
+    }
     public List<PodcastEntry> GetEntryByStatus(ProcessingStatus status) {
         var entry = _context.PodcastEntries
             .Where(e => e.ProcessingStatus == status);

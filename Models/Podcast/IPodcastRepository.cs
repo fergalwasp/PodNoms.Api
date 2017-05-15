@@ -24,6 +24,7 @@ namespace PodNoms.Api.Models
         int Delete(int id);
         int DeleteEntry(int id);
         int DeleteEntry(string slug);
+        Task<List<PodcastEntry>> GetQueuedEntriesAsync();
         List<PodcastEntry> GetEntryByStatus(ProcessingStatus status);
         Task<PodcastEntry> GetEntryAsync(int id);
     }

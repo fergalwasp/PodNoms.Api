@@ -1,7 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace PodNoms.Api.Models
-{
+namespace PodNoms.Api.Models {
     public enum ProcessingStatus {
         Waiting,
         Accepted,

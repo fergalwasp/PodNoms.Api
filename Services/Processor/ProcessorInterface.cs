@@ -5,27 +5,23 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using PodNoms.Api.Models;
 
-namespace PodNoms.Api.Services.Processor
-{
-    public class ProcessorInterface : RestClient, IProcessorInterface
-    {
+namespace PodNoms.Api.Services.Processor {
+    public class ProcessorInterface : RestClient, IProcessorInterface {
 
-        public ProcessorInterface(IOptions<AppSettings> options, ILoggerFactory loggerFactory) 
-                : base(options, loggerFactory)
-        {
+        public ProcessorInterface(IOptions<AppSettings> options, ILoggerFactory loggerFactory): base(options, loggerFactory) {
 
         }
 
-        public async Task<HttpResponseMessage> SubmitNewAudioItem(string url, string uid, string callbackUrl)
-        {
+        public async Task<HttpResponseMessage> SubmitNewAudioItem(string url, string uid, string callbackUrl) {
             var body = JsonConvert.SerializeObject(new {
                 url = url,
-                id = uid,
-                callback_url = callbackUrl
+                    id = uid,
+                    callback_url = callbackUrl
             });
             var path = "/api/processor";
             _logger.LogDebug($"Submitting to processor: {path}");
             return await _submitMessage(path, body);
         }
+
     }
 }

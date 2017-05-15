@@ -1,15 +1,12 @@
 using System;
-using System.Text;
 using System.Linq;
+using System.Text;
 
-namespace PodNoms.Api.Utils
-{
+namespace PodNoms.Api.Utils {
 
-    public static class Randomisers
-    {
+    public static class Randomisers {
         static Random _randomiser = new Random();
-        public static string RandomName()
-        {
+        public static string RandomName() {
             var myTI = new System.Globalization.CultureInfo("en-IE").TextInfo;
 
             string[] maleNames = new string[100] {
@@ -325,42 +322,53 @@ namespace PodNoms.Api.Utils
             return $"{firstName} {secondName}";
         }
 
-        internal static int RandomInteger(int lower=1, int upper=100)
-        {
+        internal static int RandomInteger(int lower = 1, int upper = 100) {
             return _randomiser.Next(lower, upper);
         }
 
-        internal static string RandomString(int length){
-                const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-                return new string(Enumerable.Repeat(chars, length)
-                  .Select(s => s[_randomiser.Next(s.Length)]).ToArray());
+        internal static string RandomString(int length) {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+                .Select(s => s[_randomiser.Next(s.Length)]).ToArray());
         }
 
         public static string LoremIpsum(int minWords, int maxWords,
-                                                int minSentences = 1, int maxSentences = 1,
-                                                int numParagraphs = 1)
-        {
+            int minSentences = 1, int maxSentences = 1,
+            int numParagraphs = 1) {
 
-            var words = new[]
-            {
-                "lorem", "ipsum", "dolor", "sit", "amet", "consectetuer",
-                "adipiscing", "elit", "sed", "diam", "nonummy", "nibh", "euismod",
-                "tincidunt", "ut", "laoreet", "dolore", "magna", "aliquam", "erat"
+            var words = new [] {
+                "lorem",
+                "ipsum",
+                "dolor",
+                "sit",
+                "amet",
+                "consectetuer",
+                "adipiscing",
+                "elit",
+                "sed",
+                "diam",
+                "nonummy",
+                "nibh",
+                "euismod",
+                "tincidunt",
+                "ut",
+                "laoreet",
+                "dolore",
+                "magna",
+                "aliquam",
+                "erat"
             };
 
-            int numSentences = _randomiser.Next(maxSentences - minSentences)
-                + minSentences + 1;
+            int numSentences = _randomiser.Next(maxSentences - minSentences) +
+                minSentences + 1;
             int numWords = _randomiser.Next(maxWords - minWords) + minWords + 1;
 
             StringBuilder result = new StringBuilder();
 
-            for (int p = 0; p < numParagraphs; p++)
-            {
+            for (int p = 0; p < numParagraphs; p++) {
                 result.Append("<p>");
-                for (int s = 0; s < numSentences; s++)
-                {
-                    for (int w = 0; w < numWords; w++)
-                    {
+                for (int s = 0; s < numSentences; s++) {
+                    for (int w = 0; w < numWords; w++) {
                         if (w > 0) { result.Append(" "); }
                         result.Append(words[_randomiser.Next(words.Length)]);
                     }

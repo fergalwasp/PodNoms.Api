@@ -9,30 +9,28 @@ using Polly;
 
 namespace PodNoms.Api.Services.Processor {
     public interface IProcessorRetryClient {
-        Task<bool> SubmitProcessorRequest(string url, string uid);
+        Task<bool> SubmitProcessorRequest(string url, string uid, string callbackAddress);
 
         Policy GetRetryPolicy();
-        void StartRetryLoop(string url, string uid);
-        Task<bool> StartRetryLoopAsync(string url, string uid);
+        void StartRetryLoop(string url, string uid, string callbackAddress);
+        Task<bool> StartRetryLoopAsync(string url, string uid, string callbackAddress);
     }
 
     public class ProcessorRetryClient : IProcessorRetryClient {
         private readonly IProcessorInterface _processor;
         private readonly ILogger<ProcessorRetryClient> _logger;
         private readonly IOptions<AppSettings> _options;
-        private readonly string _callbackAddress;
 
         public ProcessorRetryClient(IProcessorInterface processor, ILoggerFactory loggerFactory, IOptions<AppSettings> options) {
             _processor = processor;
             _logger = loggerFactory.CreateLogger<ProcessorRetryClient> ();
             _options = options;
-            _callbackAddress = $"{_options.Value.SiteUrl}/api/processresult";
         }
-        public async Task<bool> SubmitProcessorRequest(string url, string uid) {
+        public async Task<bool> SubmitProcessorRequest(string url, string uid, string callbackAddress) {
             var result = await _processor.SubmitNewAudioItem(
                 url,
                 uid,
-                _callbackAddress);
+                callbackAddress);
             return result.StatusCode == HttpStatusCode.Accepted;
         }
 
@@ -45,16 +43,16 @@ namespace PodNoms.Api.Services.Processor {
                     (ex, retryCount) =>
                     _logger.LogWarning($"Unable to connect to Job Server. Retry attempt {retryCount}. {ex}"));
         }
-        public void StartRetryLoop(string url, string uid) {
-            StartRetryLoopAsync(url, uid)
+        public void StartRetryLoop(string url, string uid, string callbackAddress) {
+            StartRetryLoopAsync(url, uid, callbackAddress)
                 .ContinueWith(r => _logger.LogDebug("Done"));
         }
-        public async Task<bool> StartRetryLoopAsync(string url, string uid) {
+        public async Task<bool> StartRetryLoopAsync(string url, string uid, string callbackAddress) {
             return await GetRetryPolicy().ExecuteAsync(async() => {
                 var result = await _processor.SubmitNewAudioItem(
                     url,
                     uid,
-                    _callbackAddress);
+                    callbackAddress);
                 if (result.StatusCode == HttpStatusCode.OK) {
                     _logger.LogDebug("Job server responded");
                     return true;

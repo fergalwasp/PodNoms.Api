@@ -1,3 +1,4 @@
+using System.Net.Http;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
@@ -14,15 +15,18 @@ namespace PodNoms.Api.Controllers.api {
         private readonly ILogger _logger;
         private readonly IOptions<AppSettings> _options;
         private readonly IProcessorRetryClient _processorRetryClient;
+        private readonly IProcessorInterface _processor;
         private readonly IMapper _mapper;
 
         public PodcastEntryController(IPodcastRepository repository,
+            IProcessorInterface processorInterface,
             IProcessorRetryClient processorRetryClient,
             ILoggerFactory loggerFactory,
             IOptions<AppSettings> options,
             IMapper mapper) {
             _repository = repository;
             _processorRetryClient = processorRetryClient;
+            _processor = processorInterface;
             _options = options;
             _logger = loggerFactory.CreateLogger<PodcastEntryController> ();
             _mapper = mapper;
@@ -36,6 +40,12 @@ namespace PodNoms.Api.Controllers.api {
         [HttpGet("{podcastId:int}")]
         public IActionResult Get(int id) {
             return Ok(_repository.GetEntry(id));
+        }
+
+        [HttpGet("queued")]
+        public async Task<IActionResult> GetQueued() {
+            var entries = await _repository.GetQueuedEntriesAsync();
+            return Ok(entries);
         }
 
         [HttpGet("waiting")]
@@ -53,12 +63,20 @@ namespace PodNoms.Api.Controllers.api {
         [HttpPost("resend")]
         public async Task<IActionResult> Resend([FromBody] PodcastEntryViewModel item) {
             if (!string.IsNullOrEmpty(item.Uid)) {
-                var result = Task.Run(() => {
-                    _processorRetryClient.StartRetryLoop(item.SourceUrl, item.Uid);
-                }).ContinueWith(e => _logger.LogDebug($"Retry loop exited: {e}"));
-
                 var entry = await _repository.GetEntryAsync(item.Id);
-                return Ok(item);
+                var callbackAddress = $"{_options.Value.SiteUrl}/api/processresult";
+                try {
+                    await _processor.SubmitNewAudioItem(
+                        item.SourceUrl,
+                        item.Uid,
+                        callbackAddress);
+                    return Ok(item);
+                } catch (HttpRequestException) {
+                    var result = Task.Run(() => {
+                        _processorRetryClient.StartRetryLoop(item.SourceUrl, item.Uid, callbackAddress);
+                    }).ContinueWith(e => _logger.LogDebug($"Retry loop exited: {e}"));
+                }
+                return Accepted(item);
             }
             return BadRequest(item);
         }
@@ -77,7 +95,10 @@ namespace PodNoms.Api.Controllers.api {
                 entry = await this._repository.AddEntryAsync(item.PodcastId, entry);
                 if (entry != null) {
                     var result = Task.Run(() => {
-                        _processorRetryClient.StartRetryLoop(item.SourceUrl, entry.Uid);
+                        _processorRetryClient.StartRetryLoop(
+                            item.SourceUrl,
+                            entry.Uid,
+                            $"{_options.Value.SiteUrl}/api/processresult");
                     }).ContinueWith(r => {
                         entry.ProcessingStatus = ProcessingStatus.Accepted;
                         this._repository.AddOrUpdateEntry(entry);
