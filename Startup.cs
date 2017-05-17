@@ -25,10 +25,10 @@ namespace PodNoms.Api {
             Configuration = configuration;
         }
 
-
         public void ConfigureServices(IServiceCollection services) {
+            var connectionString = Configuration.GetConnectionString("Podnoms");
             services.AddDbContext<PodnomsContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("Podnoms")));
+                options.UseSqlServer(connectionString));
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -37,16 +37,17 @@ namespace PodNoms.Api {
                 o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             });
-            
+
             services.AddMvc().AddJsonOptions(options => {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
             });
 
+            /* 
             services.AddHangfire(config => {
-                config.UseSqlServerStorage(Configuration.GetConnectionString("Podnoms"));
+                config.UseSqlServerStorage(connectionString);
             });
-
+            */
             services.AddCors(options => {
                 options.AddPolicy("AllowAllOrigins",
                     builder => builder
@@ -96,8 +97,8 @@ namespace PodNoms.Api {
             };
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
-            app.UseHangfireServer();
-            app.UseHangfireDashboard();
+            //app.UseHangfireServer();
+            //app.UseHangfireDashboard();
 
             app.UseCors("AllowAllOrigins");
             app.UseMvc(routes => {
