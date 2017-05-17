@@ -10,7 +10,13 @@
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0-preview1-final" />
     <PackageReference Include="NYouTubeDl" Version="0.4.3" />
     <PackageReference Include="Polly" Version="5.1.0" />
+<<<<<<< HEAD
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.4.0-preview1-25305-02" />
+=======
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0" />
+    <PackageReference Include="AutoMapper" Version="5.1.1" />
+    <PackageReference Include="PusherServer" Version="4.0.0-rc1" />
+>>>>>>> feature/pusher
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0" />
