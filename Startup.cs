@@ -19,7 +19,6 @@ using PodNoms.Api.Services.Processor;
 using PodNoms.Api.Services.Processor.Hangfire;
 using PodNoms.Api.Utils.Pusher;
 
-
 namespace PodNoms.Api {
     public class Startup {
         public Startup(IHostingEnvironment env) {
@@ -42,6 +41,11 @@ namespace PodNoms.Api {
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
+            services.AddAuthentication(o => {
+                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            });
+            
             services.AddMvc().AddJsonOptions(options => {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
@@ -86,8 +90,6 @@ namespace PodNoms.Api {
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IServiceProvider serviceProvider) {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
             var logger = loggerFactory.CreateLogger<Startup>();
             logger.LogDebug($"ConnectionString: {Configuration.GetConnectionString("Podnoms")}");
             logger.LogDebug(
@@ -99,7 +101,7 @@ namespace PodNoms.Api {
             } else {
                 app.UseExceptionHandler("/Home/Error");
             }
-            
+
             app.UseStaticFiles();
             var options = new JwtBearerOptions {
                 Audience = Configuration["auth0:clientId"],
@@ -108,12 +110,11 @@ namespace PodNoms.Api {
                         OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
                     }
             };
-            
+
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
             app.UseHangfireServer();
             app.UseHangfireDashboard();
 
-            app.UseJwtBearerAuthentication(options);
             app.UseCors("AllowAllOrigins");
             app.UseMvc(routes => {
                 routes.MapRoute(

@@ -51,7 +51,6 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
             youtubeDl.Download().WaitForExit();
 
             //at this point (I'm guessing) audio should be downloaded
-
             Console.WriteLine("Audio extracted succesfully");
             _pusherService.Trigger(
                 new PusherMessage {
