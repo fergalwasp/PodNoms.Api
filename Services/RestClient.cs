@@ -25,7 +25,6 @@ namespace PodNoms.Api.Services
                         UseProxy = true,
                 };
             }
-            _logger.LogDebug($"Processor: {_options.Value.ProcessorServerUrl}");
             _baseUri = new Uri(_options.Value.ProcessorServerUrl);
         }
 

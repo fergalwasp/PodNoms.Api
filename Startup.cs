@@ -21,18 +21,12 @@ using PodNoms.Api.Utils.Pusher;
 
 namespace PodNoms.Api {
     public class Startup {
-        public Startup(IHostingEnvironment env) {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional : true, reloadOnChange : true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional : true)
-                .AddEnvironmentVariables("PODNOMS_");
+        public IConfiguration Configuration { get; }
 
-            //builder.AddEnvironmentVariables("PODNOMS_");
-            Configuration = builder.Build();
+        public Startup(IConfiguration configuration) {
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; }
 
         public void ConfigureServices(IServiceCollection services) {
             services.AddDbContext<PodnomsContext>(options =>
@@ -90,11 +84,6 @@ namespace PodNoms.Api {
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IServiceProvider serviceProvider) {
-            var logger = loggerFactory.CreateLogger<Startup>();
-            logger.LogDebug($"ConnectionString: {Configuration.GetConnectionString("Podnoms")}");
-            logger.LogDebug(
-                $"Environment: {env.EnvironmentName}{Environment.NewLine}ProcessorServerUrl: {Configuration["AppSettings : ProcessorServerUrl "]}{Environment.NewLine}SiteUrl: {Configuration["AppSettings : SiteUrl "]}"
-            );
 
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
