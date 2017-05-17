@@ -19,22 +19,16 @@ using PodNoms.Api.Services.Processor.Hangfire;
 
 namespace PodNoms.Api {
     public class Startup {
-        public Startup(IHostingEnvironment env) {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional : true, reloadOnChange : true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional : true)
-                .AddEnvironmentVariables("PODNOMS_");
+        public IConfiguration Configuration { get; }
 
-            //builder.AddEnvironmentVariables("PODNOMS_");
-            Configuration = builder.Build();
+        public Startup(IConfiguration configuration) {
+            Configuration = configuration;
         }
 
-        public IConfigurationRoot Configuration { get; }
-
         public void ConfigureServices(IServiceCollection services) {
+            var connectionString = Configuration.GetConnectionString("Podnoms");
             services.AddDbContext<PodnomsContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("Podnoms")));
+                options.UseSqlServer(connectionString));
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -43,16 +37,17 @@ namespace PodNoms.Api {
                 o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             });
-            
+
             services.AddMvc().AddJsonOptions(options => {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
             });
 
+            /* 
             services.AddHangfire(config => {
-                config.UseSqlServerStorage(Configuration.GetConnectionString("Podnoms"));
+                config.UseSqlServerStorage(connectionString);
             });
-
+            */
             services.AddCors(options => {
                 options.AddPolicy("AllowAllOrigins",
                     builder => builder
@@ -85,11 +80,6 @@ namespace PodNoms.Api {
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IServiceProvider serviceProvider) {
-            var logger = loggerFactory.CreateLogger<Startup>();
-            logger.LogDebug($"ConnectionString: {Configuration.GetConnectionString("Podnoms")}");
-            logger.LogDebug(
-                $"Environment: {env.EnvironmentName}{Environment.NewLine}ProcessorServerUrl: {Configuration["AppSettings : ProcessorServerUrl "]}{Environment.NewLine}SiteUrl: {Configuration["AppSettings : SiteUrl "]}"
-            );
 
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
@@ -107,8 +97,8 @@ namespace PodNoms.Api {
             };
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
-            app.UseHangfireServer();
-            app.UseHangfireDashboard();
+            //app.UseHangfireServer();
+            //app.UseHangfireDashboard();
 
             app.UseCors("AllowAllOrigins");
             app.UseMvc(routes => {

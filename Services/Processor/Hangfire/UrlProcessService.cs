@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using NYoutubeDL;
 using NYoutubeDL.Options;
@@ -11,7 +12,7 @@ using static NYoutubeDL.Helpers.Enums;
 
 namespace PodNoms.Api.Services.Processor.Hangfire {
     public interface IUrlProcessService {
-        void ProcessUrl(string uid, string url);
+        Task<bool> ProcessUrl(string uid, string url);
     }
     public class UrlProcessService : IUrlProcessService {
         private readonly IPodcastRepository _repository;
@@ -23,7 +24,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
         public UrlProcessService(IPodcastRepository repository) {
             this._repository = repository;
         }
-        public void ProcessUrl(string uid, string url) {
+        public async Task<bool> ProcessUrl(string uid, string url) {
             var guid = System.Guid.NewGuid().ToString();
             Console.WriteLine($"Processing started: {url}");
             var youtubeDl = new YoutubeDL();
@@ -55,6 +56,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
 
             //at this point (I'm guessing) audio should be downloaded
             Console.WriteLine("Audio extracted succesfully");
+
             var options = new PusherOptions();
             options.Cluster = "eu";
             var entry = _repository.GetEntryByUid(uid);
@@ -63,10 +65,11 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
                 entry.Title = downloadInfo.Title;
 
                 var pusher = new Pusher("242694", "80e33149d1e70ae7907a", "2c0aca674b8216f5629e", options);
-                pusher.TriggerAsync($"{uid}__process_podcast", "audio-processed", new {
+                var ITriggerOptions = await pusher.TriggerAsync($"{uid}__process_podcast", "audio-processed", new {
                     message = downloadInfo.Title
                 });
             }
+            return true;
         }
     }
 }
