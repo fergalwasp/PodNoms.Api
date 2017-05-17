@@ -15,10 +15,7 @@ using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Services;
 using PodNoms.Api.Services.Auth;
-using PodNoms.Api.Services.Processor;
 using PodNoms.Api.Services.Processor.Hangfire;
-using PodNoms.Api.Utils.Pusher;
-
 
 namespace PodNoms.Api {
     public class Startup {
@@ -74,9 +71,6 @@ namespace PodNoms.Api {
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddScoped<IPodcastRepository, PodcastRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddTransient<IProcessorInterface, ProcessorInterface>();
-            services.AddTransient<IProcessorRetryClient, ProcessorRetryClient>();
-            services.AddSingleton<IPusherService, PusherService>();
             services.AddSingleton<IMapper>(sp => mapperConfiguration.CreateMapper());
             services.AddSingleton<IUrlProcessService, UrlProcessService>();
 
@@ -99,7 +93,7 @@ namespace PodNoms.Api {
             } else {
                 app.UseExceptionHandler("/Home/Error");
             }
-            
+
             app.UseStaticFiles();
             var options = new JwtBearerOptions {
                 Audience = Configuration["auth0:clientId"],
@@ -108,7 +102,7 @@ namespace PodNoms.Api {
                         OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
                     }
             };
-            
+
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
             app.UseHangfireServer();
             app.UseHangfireDashboard();

@@ -57,6 +57,7 @@
     <PackageReference Include="Polly" Version="5.1.0" />
     <PackageReference Include="System.Text.Encoding.CodePages" Version="4.3.0" />
     <PackageReference Include="AutoMapper" Version="5.1.1" />
+    <PackageReference Include="PusherServer" Version="4.0.0-rc1" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0-msbuild3-final" />

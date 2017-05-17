@@ -130,7 +130,7 @@ public class PodcastRepository : IPodcastRepository {
 
         if (podcast != null) {
             if (podcast.PodcastEntries == null) {
-                podcast.PodcastEntries = new List<PodcastEntry> ();
+                podcast.PodcastEntries = new List<PodcastEntry>();
             }
 
             podcast.PodcastEntries.Add(item);
@@ -146,7 +146,7 @@ public class PodcastRepository : IPodcastRepository {
 
         if (podcast != null) {
             if (podcast.PodcastEntries == null) {
-                podcast.PodcastEntries = new List<PodcastEntry> ();
+                podcast.PodcastEntries = new List<PodcastEntry>();
             }
 
             podcast.PodcastEntries.Add(item);
@@ -180,15 +180,23 @@ public class PodcastRepository : IPodcastRepository {
         return entry;
     }
 
+    public async Task<PodcastEntry> SetEntryProcessed(string uid) {
+        var entry = _context.PodcastEntries.Single(e => e.Uid == uid);
+        entry.Processed = true;
+        entry.ProcessingStatus = ProcessingStatus.Processed;
+        await _context.SaveChangesAsync();
+        return entry;
+    }
+
     public int Delete(int id) {
-        var podcast = _context.Podcasts.FirstOrDefault(p => p.Id == id);
+        var podcast = _context.Podcasts.Single(p => p.Id == id);
         if (podcast != null) {
             if (podcast.PodcastEntries != null) {
                 foreach(var entry in podcast.PodcastEntries) {
                     _context.Remove(entry);
                 }
             }
-            _context.Remove<Podcast> (podcast);
+            _context.Remove<Podcast>(podcast);
             return _context.SaveChanges();
         }
         return -1;
@@ -196,7 +204,7 @@ public class PodcastRepository : IPodcastRepository {
     public int DeleteEntry(int id) {
         var podcast = _context.PodcastEntries.FirstOrDefault(p => p.Id == id);
         if (podcast != null) {
-            _context.Remove<PodcastEntry> (podcast);
+            _context.Remove<PodcastEntry>(podcast);
             return _context.SaveChanges();
         }
         return -1;
@@ -204,7 +212,7 @@ public class PodcastRepository : IPodcastRepository {
     public int DeleteEntry(string slug) {
         var podcast = _context.PodcastEntries.FirstOrDefault(p => p.Slug == slug);
         if (podcast != null) {
-            _context.Remove<PodcastEntry> (podcast);
+            _context.Remove<PodcastEntry>(podcast);
             return _context.SaveChanges();
         }
         return -1;

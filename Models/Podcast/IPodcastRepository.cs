@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PodNoms.Api.Models
-{
-    public interface IPodcastRepository
-    {
+namespace PodNoms.Api.Models {
+    public interface IPodcastRepository {
         IEnumerable<Podcast> GetAll();
         IEnumerable<Podcast> GetAll(string UserId);
         Podcast Get(int id);
@@ -21,6 +19,7 @@ namespace PodNoms.Api.Models
         Task<PodcastEntry> AddEntryAsync(int PodcastId, PodcastEntry item);
         PodcastEntry AddOrUpdateEntry(PodcastEntry item);
         Task<PodcastEntry> AddOrUpdateEntryAsync(PodcastEntry item);
+        Task<PodcastEntry> SetEntryProcessed(string uid);
         int Delete(int id);
         int DeleteEntry(int id);
         int DeleteEntry(string slug);
