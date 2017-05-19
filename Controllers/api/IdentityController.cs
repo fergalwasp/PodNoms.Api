@@ -1,16 +1,13 @@
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 
-namespace PodNoms.Api.Controllers.api
-{
+namespace PodNoms.Api.Controllers.api {
     [Route("identity")]
     [Authorize]
-    public class IdentityController : ControllerBase
-    {
+    public class IdentityController : ControllerBase {
         [HttpGet]
-        public IActionResult Get()
-        {
+        public IActionResult Get() {
             return new JsonResult(from c in User.Claims select new { c.Type, c.Value });
         }
     }

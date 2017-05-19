@@ -3,8 +3,10 @@ using System.Text;
 using AutoMapper;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,9 +35,29 @@ namespace PodNoms.Api {
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
-            services.AddAuthentication(o => {
-                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            services.AddAuthentication(options => {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
+            });
+
+            services.AddJwtBearerAuthentication(options => {
+                /* configure options.TokenValidationParameters */
+                options.Audience = Configuration["auth0:clientId"];
+                options.Authority = $"https://{Configuration["auth0:domain"]}/";
+                options.Events = new JwtBearerEvents() {
+                    OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
+                };
+            });
+            
+            var defaultPolicy =
+                new AuthorizationPolicyBuilder()
+                .AddAuthenticationSchemes("Bearer")
+                .RequireAuthenticatedUser()
+                .Build();
+            
+            services.AddAuthorization(j => {
+                j.DefaultPolicy = defaultPolicy;
             });
 
             services.AddMvc().AddJsonOptions(options => {
@@ -79,7 +101,8 @@ namespace PodNoms.Api {
             Encoding.RegisterProvider(instance);
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IServiceProvider serviceProvider) {
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env,
+            ILoggerFactory loggerFactory, IServiceProvider serviceProvider) {
 
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
@@ -88,13 +111,6 @@ namespace PodNoms.Api {
             }
 
             app.UseStaticFiles();
-            var options = new JwtBearerOptions {
-                Audience = Configuration["auth0:clientId"],
-                    Authority = $"https://{Configuration["auth0:domain"]}/",
-                    Events = new JwtBearerEvents() {
-                        OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
-                    }
-            };
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
             //app.UseHangfireServer();
