@@ -10,6 +10,7 @@ using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Utils.Extensions;
 
 namespace PodNoms.Api.Controllers.api {
+    [Authorize]
     [Route("api/[controller]")]
     public class PodcastController : Controller {
         private readonly IPodcastRepository _podcastRepository;

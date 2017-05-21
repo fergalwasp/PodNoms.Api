@@ -65,11 +65,10 @@ namespace PodNoms.Api {
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
             });
 
-            /* 
             services.AddHangfire(config => {
                 config.UseSqlServerStorage(connectionString);
             });
-            */
+
             services.AddCors(options => {
                 options.AddPolicy("AllowAllOrigins",
                     builder => builder
@@ -113,8 +112,8 @@ namespace PodNoms.Api {
             app.UseStaticFiles();
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
-            //app.UseHangfireServer();
-            //app.UseHangfireDashboard();
+            app.UseHangfireServer();
+            app.UseHangfireDashboard();
 
             app.UseCors("AllowAllOrigins");
             app.UseMvc(routes => {
