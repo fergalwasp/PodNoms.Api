@@ -15,20 +15,22 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
         Task<bool> ProcessUrl(string uid, string url);
     }
     public class UrlProcessService : IUrlProcessService {
-        private readonly IPodcastRepository _repository;
+        private readonly IUnitOfWork unitOfWork;
+        private readonly IPodcastRepository repository;
 
         public class ProcessObject {
             public string name { get; set; }
             public override string ToString() { return name; }
         }
-        public UrlProcessService(IPodcastRepository repository) {
-            this._repository = repository;
+        public UrlProcessService(IPodcastRepository repository, IUnitOfWork unitOfWork) {
+            this.repository = repository;
+            this.unitOfWork = unitOfWork;
         }
         public async Task<bool> ProcessUrl(string uid, string url) {
             var guid = System.Guid.NewGuid().ToString();
             Console.WriteLine($"Processing started: {url}");
             var youtubeDl = new YoutubeDL();
-            
+
             youtubeDl.Options.FilesystemOptions.Output = Path.Combine(System.IO.Path.GetTempPath(), "podnoms", $"{guid}.mp3");
             youtubeDl.Options.PostProcessingOptions.AudioFormat = AudioFormat.mp3;
             youtubeDl.Options.PostProcessingOptions.ExtractAudio = true;
@@ -59,8 +61,10 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
 
             var options = new PusherOptions();
             options.Cluster = "eu";
-            var entry = _repository.GetEntryByUid(uid);
+            /*
+            var entry = await repository.GetEntryByUidAsync(uid);
             if (entry != null) {
+                entry.ProcessingStatus = ProcessingStatus.Processed;
                 entry.Processed = true;
                 entry.Title = downloadInfo.Title;
 
@@ -68,7 +72,10 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
                 var ITriggerOptions = await pusher.TriggerAsync($"{uid}__process_podcast", "audio-processed", new {
                     message = downloadInfo.Title
                 });
+
+                await this.unitOfWork.CompleteAsync();
             }
+            */
             return true;
         }
     }

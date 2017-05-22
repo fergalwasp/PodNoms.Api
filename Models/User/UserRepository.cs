@@ -1,35 +1,28 @@
 ﻿using System.Linq;
+using PodNoms.Api.Models;
+using PodNoms.Api.Persistence;
 using PodNoms.Api.Utils;
 
-namespace PodNoms.Api.Models
-{
-    public class UserRepository : IUserRepository
-    {
+namespace PodNoms.Api.Models {
+    public class UserRepository : IUserRepository {
         private readonly PodnomsContext _context;
 
-        public UserRepository(PodnomsContext context)
-        {
+        public UserRepository(PodnomsContext context) {
             _context = context;
         }
 
-        public User Get(int id)
-        {
+        public User Get(int id) {
             return _context.Users.FirstOrDefault(u => u.Id == id);
         }
 
-        public User Get(string email)
-        {
+        public User Get(string email) {
             return _context.Users.FirstOrDefault(u => u.EmailAddress == email);
         }
 
-        public User AddOrUpdate(User entry)
-        {
-            if (entry.Id != 0)
-            {
-                    _context.Users.Attach(entry);
-            }
-            else
-            {
+        public User AddOrUpdate(User entry) {
+            if (entry.Id != 0) {
+                _context.Users.Attach(entry);
+            } else {
                 _context.Users.Add(entry);
 
             }
@@ -37,12 +30,10 @@ namespace PodNoms.Api.Models
             return entry;
         }
 
-        public User UpdateRegistration(string email, string name, string sid, string providerId, string profileImage)
-        {
+        public User UpdateRegistration(string email, string name, string sid, string providerId, string profileImage) {
             var user = _context.Users.FirstOrDefault(u => u.EmailAddress == email);
 
-            if (user == null)
-            {
+            if (user == null) {
                 user = new User();
                 user.EmailAddress = email;
                 _context.Users.Add(user);
@@ -63,14 +54,11 @@ namespace PodNoms.Api.Models
             return user;
         }
 
-        public string UpdateApiKey(string email)
-        {
+        public string UpdateApiKey(string email) {
             var newKey = "";
             var user = _context.Users.FirstOrDefault(u => u.EmailAddress == email);
-            if (user != null)
-            {
-                do
-                {
+            if (user != null) {
+                do {
                     newKey = Randomisers.RandomString(16);
                 } while (_context.Users.FirstOrDefault(u => u.ApiKey == newKey) != null);
             }
