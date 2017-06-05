@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
+using PodNoms.Api.Persistence;
 
 namespace PodNoms.Api.Controllers.api {
     [Authorize]

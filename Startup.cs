@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
+using PodNoms.Api.Persistence;
 using PodNoms.Api.Services;
 using PodNoms.Api.Services.Auth;
 using PodNoms.Api.Services.Processor.Hangfire;
@@ -28,9 +29,11 @@ namespace PodNoms.Api {
         }
 
         public void ConfigureServices(IServiceCollection services) {
-            var connectionString = Configuration.GetConnectionString("Podnoms");
-            services.AddDbContext<PodnomsContext>(options =>
-                options.UseSqlServer(connectionString));
+
+            services.AddAutoMapper();
+
+            services.AddDbContext<PodnomsDbContext>(options =>
+                options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -49,13 +52,13 @@ namespace PodNoms.Api {
                     OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
                 };
             });
-            
+
             var defaultPolicy =
                 new AuthorizationPolicyBuilder()
                 .AddAuthenticationSchemes("Bearer")
                 .RequireAuthenticatedUser()
                 .Build();
-            
+
             services.AddAuthorization(j => {
                 j.DefaultPolicy = defaultPolicy;
             });
@@ -66,7 +69,8 @@ namespace PodNoms.Api {
             });
 
             services.AddHangfire(config => {
-                config.UseSqlServerStorage(connectionString);
+                config.UseSqlServerStorage(Configuration["ConnectionStrings:Default"]);
+                config.UseColouredConsoleLogProvider();
             });
 
             services.AddCors(options => {
@@ -78,22 +82,15 @@ namespace PodNoms.Api {
                     .AllowCredentials());
             });
 
-            //register automapper
-            var mapperConfiguration = new AutoMapper.MapperConfiguration(cfg => {
-                cfg.CreateMap<PodcastViewModel, Podcast>();
-                cfg.CreateMap<PodcastEntryViewModel, PodcastEntry>();
-            });
-
-            var mapper = mapperConfiguration.CreateMapper();
-
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPodcastRepository, PodcastRepository>();
+            services.AddScoped<IEntryRepository, EntryRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddSingleton<IMapper>(sp => mapperConfiguration.CreateMapper());
-            services.AddSingleton<IUrlProcessService, UrlProcessService>();
+            services.AddScoped<IUrlProcessService, UrlProcessService>();
 
             //register the codepages (required for slugify)
             var instance = CodePagesEncodingProvider.Instance;
@@ -112,6 +109,7 @@ namespace PodNoms.Api {
             app.UseStaticFiles();
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
+
             app.UseHangfireServer();
             app.UseHangfireDashboard();
 
