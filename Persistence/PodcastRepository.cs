@@ -10,8 +10,8 @@ using PodNoms.Api.Utils.Extensions;
 
 namespace PodNoms.Api.Models {
     public class PodcastRepository : IPodcastRepository {
-        private readonly PodnomsContext context;
-        public PodcastRepository(PodnomsContext context) {
+        private readonly PodnomsDbContext context;
+        public PodcastRepository(PodnomsDbContext context) {
             this.context = context;
         }
         public async Task<Podcast> GetAsync(int id) {

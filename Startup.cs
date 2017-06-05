@@ -29,9 +29,11 @@ namespace PodNoms.Api {
         }
 
         public void ConfigureServices(IServiceCollection services) {
-            var connectionString = Configuration.GetConnectionString("Podnoms");
-            services.AddDbContext<PodnomsContext>(options =>
-                options.UseSqlServer(connectionString));
+
+            services.AddAutoMapper();
+
+            services.AddDbContext<PodnomsDbContext>(options =>
+                options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
@@ -50,13 +52,13 @@ namespace PodNoms.Api {
                     OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
                 };
             });
-            
+
             var defaultPolicy =
                 new AuthorizationPolicyBuilder()
                 .AddAuthenticationSchemes("Bearer")
                 .RequireAuthenticatedUser()
                 .Build();
-            
+
             services.AddAuthorization(j => {
                 j.DefaultPolicy = defaultPolicy;
             });
@@ -67,7 +69,7 @@ namespace PodNoms.Api {
             });
 
             services.AddHangfire(config => {
-                config.UseSqlServerStorage(connectionString);
+                config.UseSqlServerStorage(Configuration["ConnectionStrings:Default"]);
                 config.UseColouredConsoleLogProvider();
             });
 
@@ -80,16 +82,15 @@ namespace PodNoms.Api {
                     .AllowCredentials());
             });
 
-            services.AddAutoMapper();
-
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPodcastRepository, PodcastRepository>();
+            services.AddScoped<IEntryRepository, EntryRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddSingleton<IUrlProcessService, UrlProcessService>();
+            services.AddScoped<IUrlProcessService, UrlProcessService>();
 
             //register the codepages (required for slugify)
             var instance = CodePagesEncodingProvider.Instance;

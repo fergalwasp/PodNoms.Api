@@ -3,11 +3,11 @@ using PodNoms.Api.Models;
 using PodNoms.Api.Persistence;
 using PodNoms.Api.Utils;
 
-namespace PodNoms.Api.Models {
+namespace PodNoms.Api.Persistence {
     public class UserRepository : IUserRepository {
-        private readonly PodnomsContext _context;
+        private readonly PodnomsDbContext _context;
 
-        public UserRepository(PodnomsContext context) {
+        public UserRepository(PodnomsDbContext context) {
             _context = context;
         }
 

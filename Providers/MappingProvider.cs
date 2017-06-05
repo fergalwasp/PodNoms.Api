@@ -8,11 +8,11 @@ namespace PodNoms.Api.Providers {
 
             //Domain to API Resource
             CreateMap<Podcast, PodcastResource>();
-            CreateMap<PodcastEntry, PodcastEntryResource>();
+            CreateMap<PodcastEntry, EntryResource>();
 
             //API Resource to Domain
             CreateMap<PodcastResource, Podcast>();
-            CreateMap<PodcastEntryResource, PodcastEntry>();
+            CreateMap<EntryResource, PodcastEntry>();
         }
     }
 }

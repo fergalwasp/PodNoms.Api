@@ -1,81 +1,99 @@
 using System;
 using System.ComponentModel;
+using System.Dynamic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using NYoutubeDL;
-using NYoutubeDL.Options;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using PodNoms.Api.Models;
+using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Downloader;
 using PusherServer;
-using static NYoutubeDL.Helpers.Enums;
 
 namespace PodNoms.Api.Services.Processor.Hangfire {
     public interface IUrlProcessService {
-        Task<bool> ProcessUrl(string uid, string url);
+        Task<bool> GetInformation(int entryId);
+        Task<bool> DownloadAudio(int entryId);
     }
     public class UrlProcessService : IUrlProcessService {
-        private readonly IUnitOfWork unitOfWork;
-        private readonly IPodcastRepository repository;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IEntryRepository _repository;
+        private readonly IConfiguration _config;
+        private readonly ILogger _logger;
+        private Pusher _pusher;
 
-        public class ProcessObject {
-            public string name { get; set; }
-            public override string ToString() { return name; }
-        }
-        public UrlProcessService(IPodcastRepository repository, IUnitOfWork unitOfWork) {
-            this.repository = repository;
-            this.unitOfWork = unitOfWork;
-        }
-        public async Task<bool> ProcessUrl(string uid, string url) {
-            var guid = System.Guid.NewGuid().ToString();
-            Console.WriteLine($"Processing started: {url}");
-            var youtubeDl = new YoutubeDL();
-
-            youtubeDl.Options.FilesystemOptions.Output = Path.Combine(System.IO.Path.GetTempPath(), "podnoms", $"{guid}.mp3");
-            youtubeDl.Options.PostProcessingOptions.AudioFormat = AudioFormat.mp3;
-            youtubeDl.Options.PostProcessingOptions.ExtractAudio = true;
-            youtubeDl.Options.ThumbnailImagesOptions.ListThumbnails = true;
-            youtubeDl.Options.ThumbnailImagesOptions.WriteAllThumbnails = true;
-            youtubeDl.Options.ThumbnailImagesOptions.WriteThumbnail = true;
-
-            youtubeDl.VideoUrl = url;
-
-            youtubeDl.StandardOutputEvent += (sender, output) => {
-                Console.WriteLine(output);
-            };
-            youtubeDl.StandardErrorEvent += (sender, errorOutput) => {
-                Console.WriteLine(errorOutput);
-            };
-
-            var downloadInfo = youtubeDl.GetDownloadInfo();
-
-            youtubeDl.Info.PropertyChanged += (s, e) => {
-                Console.WriteLine(e);
-            };
-
-            var download = youtubeDl.PrepareDownload();
-            youtubeDl.Download().WaitForExit();
-
-            //at this point (I'm guessing) audio should be downloaded
-            Console.WriteLine("Audio extracted succesfully");
+        public UrlProcessService(IEntryRepository repository, IUnitOfWork unitOfWork,
+            IConfiguration config, ILoggerFactory loggerFactory) {
+            this._logger = loggerFactory.CreateLogger<UrlProcessService>();
+            this._repository = repository;
+            this._unitOfWork = unitOfWork;
+            this._config = config;
 
             var options = new PusherOptions();
-            options.Cluster = "eu";
-            /*
-            var entry = await repository.GetEntryByUidAsync(uid);
-            if (entry != null) {
-                entry.ProcessingStatus = ProcessingStatus.Processed;
-                entry.Processed = true;
-                entry.Title = downloadInfo.Title;
-
-                var pusher = new Pusher("242694", "80e33149d1e70ae7907a", "2c0aca674b8216f5629e", options);
-                var ITriggerOptions = await pusher.TriggerAsync($"{uid}__process_podcast", "audio-processed", new {
-                    message = downloadInfo.Title
-                });
-
-                await this.unitOfWork.CompleteAsync();
+            options.Cluster = config["Pusher:Cluster"];
+            this._pusher = new Pusher(
+                config["Pusher:AppId"],
+                config["Pusher:Key"],
+                config["Pusher:Secret"],
+                options);
+        }
+        public async Task<bool> GetInformation(int entryId) {
+            var entry = await _repository.GetAsync(entryId);
+            if (entry == null || string.IsNullOrEmpty(entry.SourceUrl)) {
+                _logger.LogError("Unable to process item");
+                return false;
             }
-            */
+
+            var downloader = new AudioDownloader(entry.SourceUrl);
+            downloader.DownloadInfo();
+            if (downloader.Properties != null) {
+                entry.Title = downloader.Properties?.title;
+                entry.Description = downloader.Properties?.description;
+                entry.Author = downloader.Properties?.uploader;
+                entry.ImageUrl = downloader.Properties?.thumbnail;
+                await _unitOfWork.CompleteAsync();
+
+                _logger.LogDebug("***DOWNLOAD INFO RETRIEVED****\n");
+                _logger.LogDebug($"Title: {entry.Title}\nDescription: {entry.Description}\nAuthor: {entry.Author}\n");
+
+                try {
+                    var ITriggerOptions =
+                        await _pusher.TriggerAsync(
+                            $"{entry.Uid}__process_podcast",
+                            "info_processed",
+                            new {
+                                message = entry.Title
+                            });
+                } catch (Exception ex) {
+                    _logger.LogError(123456, ex, "Error sending pusher message");
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<bool> DownloadAudio(int entryId) {
+            var entry = await _repository.GetAsync(entryId);
+            if (entry == null)
+                return false;
+
+            var downloader = new AudioDownloader(entry.SourceUrl);
+            var outputFile =
+                Path.Combine(System.IO.Path.GetTempPath(), $"{System.Guid.NewGuid().ToString()}.mp3");
+
+            downloader.DownloadProgress += (s, e) => {
+                Console.WriteLine(
+                    $"Progress: {e.Percentage}% Speed: {e.CurrentSpeed} Size: {e.TotalSize}");
+            };
+            downloader.PostProcessing += (s, e) => {
+                Console.WriteLine(e);
+            };
+            var file = downloader.DownloadAudio();
+            entry.ProcessingStatus = ProcessingStatus.Processed;
+            entry.Processed = true;
+            await _unitOfWork.CompleteAsync();
+
             return true;
         }
     }

@@ -3,8 +3,8 @@ using PodNoms.Api.Persistence;
 
 namespace PodNoms.Api.Models {
     public class UnitOfWork : IUnitOfWork {
-        private readonly PodnomsContext context;
-        public UnitOfWork(PodnomsContext context) {
+        private readonly PodnomsDbContext context;
+        public UnitOfWork(PodnomsDbContext context) {
             this.context = context;
 
         }

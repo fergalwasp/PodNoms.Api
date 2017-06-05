@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using PodNoms.Api.Controllers.Resources;
 using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
+using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Processor.Hangfire;
 using PodNoms.Api.Utils.Extensions;
 
@@ -55,16 +56,6 @@ namespace PodNoms.Api.Controllers.api {
                 item.User = user;
                 var ret = await podcastRepository.AddOrUpdateAsync(item);
                 await unitOfWork.CompleteAsync();
-                
-                foreach(var entry in item.PodcastEntries){
-                    if (entry.ProcessingStatus == ProcessingStatus.Accepted){
-                        //new entry, needs to be processed
-                        entry.Uid = System.Guid.NewGuid().ToString();
-                        BackgroundJob.Enqueue<IUrlProcessService>(service => service.ProcessUrl(
-                            entry.Uid,
-                            entry.SourceUrl));                     
-                    }
-                }
                 return new OkObjectResult(mapper.Map<Podcast, PodcastResource>(ret));
             }
             return BadRequest("Invalid request data");

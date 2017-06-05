@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Logging;
 using PodNoms.Api.Models;
+using PodNoms.Api.Persistence;
 
 namespace PodNoms.Api.Services.Auth {
     public class AuthenticationMiddleware {
