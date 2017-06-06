@@ -19,6 +19,7 @@ using PodNoms.Api.Persistence;
 using PodNoms.Api.Services;
 using PodNoms.Api.Services.Auth;
 using PodNoms.Api.Services.Processor.Hangfire;
+using PodNoms.Api.Utils.Azure;
 
 namespace PodNoms.Api {
     public class Startup {
@@ -36,7 +37,8 @@ namespace PodNoms.Api {
                 options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
 
             services.AddOptions();
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.Configure<AppSettings>(Configuration.GetSection("App"));
+            services.Configure<AudioStorageSettings>(Configuration.GetSection("AudioStorage"));
 
             services.AddAuthentication(options => {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -85,7 +87,7 @@ namespace PodNoms.Api {
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
+            services.AddTransient<IFileUploader, FileUploader>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPodcastRepository, PodcastRepository>();
             services.AddScoped<IEntryRepository, EntryRepository>();

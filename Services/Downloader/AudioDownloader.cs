@@ -22,10 +22,9 @@ namespace PodNoms.Api.Services.Downloader {
         public void Dispose() {
 
         }
-        public string DownloadAudio() {
-
-            var uid = Guid.NewGuid().ToString();
-            var outputFile = Path.Combine(Path.GetTempPath(), $"{uid}.m4a");
+        public (string, string) DownloadAudio() {
+            var outputFileName = $"{Guid.NewGuid().ToString()}.mp3";
+            var outputFile = Path.Combine(Path.GetTempPath(), outputFileName);
             var proc = new Process {
                 StartInfo = new ProcessStartInfo {
                     FileName = "youtube-dl",
@@ -53,9 +52,9 @@ namespace PodNoms.Api.Services.Downloader {
             }
 
             if (File.Exists(outputFile)) {
-                return outputFile;
+                return (outputFile, outputFileName);
             }
-            return string.Empty;
+            return (string.Empty, string.Empty);
         }
 
         public void DownloadInfo() {

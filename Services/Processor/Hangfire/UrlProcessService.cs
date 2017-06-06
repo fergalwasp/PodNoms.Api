@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using PodNoms.Api.Models;
 using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Downloader;
+using PodNoms.Api.Utils.Azure;
 using PusherServer;
 
 namespace PodNoms.Api.Services.Processor.Hangfire {
@@ -22,10 +23,12 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
         private readonly IConfiguration _config;
         private readonly ILogger _logger;
         private Pusher _pusher;
+        private readonly IFileUploader _fileUploader;
 
         public UrlProcessService(IEntryRepository repository, IUnitOfWork unitOfWork,
-            IConfiguration config, ILoggerFactory loggerFactory) {
-            this._logger = loggerFactory.CreateLogger<UrlProcessService>();
+            IConfiguration config, ILoggerFactory logger, IFileUploader fileUploader) {
+            this._fileUploader = fileUploader;
+            this._logger = logger.CreateLogger<UrlProcessService>();
             this._repository = repository;
             this._unitOfWork = unitOfWork;
             this._config = config;
@@ -89,12 +92,16 @@ namespace PodNoms.Api.Services.Processor.Hangfire {
             downloader.PostProcessing += (s, e) => {
                 Console.WriteLine(e);
             };
-            var file = downloader.DownloadAudio();
-            entry.ProcessingStatus = ProcessingStatus.Processed;
-            entry.Processed = true;
-            await _unitOfWork.CompleteAsync();
+            var (sourceFile, fileName) = downloader.DownloadAudio();
+            if (!string.IsNullOrEmpty(sourceFile)) {
+                entry.ProcessingStatus = ProcessingStatus.Processed;
+                entry.Processed = true;
 
-            return true;
+                var cdnFile = await _fileUploader.UploadFile(sourceFile, fileName);
+                entry.AudioUrl = cdnFile;
+                await _unitOfWork.CompleteAsync();
+            }
+            return false;
         }
     }
 }

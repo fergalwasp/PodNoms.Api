@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
@@ -30,6 +31,8 @@ namespace PodNoms.Api.Controllers.api {
 
             var infoJobId = BackgroundJob.Enqueue<IUrlProcessService>(service => service.GetInformation(entry.Id));
             var extractJobId = BackgroundJob.ContinueWith<IUrlProcessService>(infoJobId, service => service.DownloadAudio(entry.Id));
+            // await processor.GetInformation(entry.Id);
+            // await processor.DownloadAudio(entry.Id);
 
             var result = mapper.Map<PodcastEntry, EntryResource>(entry);
             return Ok(result);
