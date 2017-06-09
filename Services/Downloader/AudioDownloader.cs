@@ -21,18 +21,26 @@ namespace PodNoms.Api.Services.Downloader {
             }
             public void Dispose() {
 
-            }
-            public(string, string) DownloadAudio() {
+            var StartInfo = new ProcessStartInfo {
+            FileName = "pinfo",
+            Arguments = $"argie bargie",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            CreateNoWindow = true
+            };
+
+        }
+        public(string, string) DownloadAudio() {
             var outputFileName = $"{Guid.NewGuid().ToString()}.mp3";
             var outputFile = Path.Combine(Path.GetTempPath(), outputFileName);
             var proc = new Process {
-                StartInfo = new ProcessStartInfo {
-                    FileName = "youtube-dl",
-                    Arguments = $"-o {outputFile} --audio-format mp3 -x \"{this.url}\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    CreateNoWindow = true
-                }
+            StartInfo = new ProcessStartInfo {
+            FileName = "youtube-dl",
+            Arguments = $"-o {outputFile} --audio-format mp3 -x \"{this.url}\"",
+            UseShellExecute = false,
+            RedirectStandardOutput = true,
+            CreateNoWindow = true
+            }
             };
 
             StringBuilder br = new StringBuilder();

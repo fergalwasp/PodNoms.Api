@@ -16,7 +16,7 @@ using PodNoms.Api.Services.Processor.Hangfire;
 using PodNoms.Api.Utils.Extensions;
 
 namespace PodNoms.Api.Controllers.api {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     public class PodcastController : Controller {
         private readonly IPodcastRepository _repository;
@@ -36,7 +36,7 @@ namespace PodNoms.Api.Controllers.api {
 
         [HttpGet]
         public async Task<IEnumerable<PodcastResource>> Get() {
-            var email = "fergal.moran@gmail.com"; //User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ? .Value;
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ? .Value;
             if (!string.IsNullOrEmpty(email)) {
                 var podcasts = await _repository.GetAllAsync(email);
                 return _mapper.Map<List<Podcast>, List<PodcastResource>>(podcasts.ToList());
@@ -46,7 +46,7 @@ namespace PodNoms.Api.Controllers.api {
 
         [HttpPost]
         public async Task<IActionResult> CreatePodcast([FromBody] PodcastResource podcast) {
-            var email = "fergal.moran@gmail.com"; //User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ? .Value;
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ? .Value;
             var user = _userRepository.Get(email);
             if (string.IsNullOrEmpty(email) || user == null)
                 return new BadRequestObjectResult("Unable to look up user profile");
@@ -62,45 +62,3 @@ namespace PodNoms.Api.Controllers.api {
         }
     }
 }
-/*
-        [HttpGet("{slug}")]
-        public async Task<ActionResult> Get(string slug) {
-            return new OkObjectResult(await _podcastRepository.GetAsync(slug));
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Post([FromBody] PodcastViewModel item) {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ? .Value;
-            var user = _userRepository.Get(email);
-            if (string.IsNullOrEmpty(email) || user == null)
-                return new BadRequestObjectResult("Unable to look up user profile");
-
-            if (ModelState.IsValid) {
-                var podcast = _mapper.Map<Podcast>(item);
-                //TODO: move slugify logic
-                podcast.User = user;
-                var ret = await _podcastRepository.AddOrUpdateAsync(podcast);
-                await _unitOfWork.CompleteAsync();
-                return new OkObjectResult(ret);
-            }
-            return BadRequest("Invalid request data");
-        }
-
-        [HttpDelete("{id}")]
-        public ActionResult Delete(int id) {
-            _podcastRepository.DeleteAsync(id);
-            return new OkObjectResult(_podcastRepository.GetAllAsync());
-        }
-
-        [HttpGet("rssurl/{slug}")]
-        public async Task<ActionResult> RssUrl(string slug) {
-            var entry = await _podcastRepository.GetAsync(slug);
-            if (entry != null) {
-                var result = new {
-                    Data = $"__vscode_pp_lerp_start__"+_options.Value.SiteUrl+"__vscode_pp_lerp_end__/api/rss/__vscode_pp_lerp_start__"+entry.Slug+"__vscode_pp_lerp_end__"
-                };
-                return new OkObjectResult(result);
-            }
-            return NotFound();
-        }
-*/
