@@ -16,22 +16,29 @@ using Newtonsoft.Json.Serialization;
 using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
+using PodNoms.Api.Providers;
 using PodNoms.Api.Services;
 using PodNoms.Api.Services.Auth;
 using PodNoms.Api.Services.Processor.Hangfire;
 using PodNoms.Api.Utils.Azure;
 
-namespace PodNoms.Api {
-    public class Startup {
+namespace PodNoms.Api
+{
+    public class Startup
+    {
         public IConfiguration Configuration { get; }
 
-        public Startup(IConfiguration configuration) {
+        public Startup(IConfiguration configuration)
+        {
             Configuration = configuration;
         }
 
-        public void ConfigureServices(IServiceCollection services) {
+        public void ConfigureServices(IServiceCollection services)
+        {
 
-            services.AddAutoMapper();
+            services.AddAutoMapper(e => {
+                e.AddProfile(new MappingProvider());
+            });
 
             services.AddDbContext<PodnomsDbContext>(options =>
                 options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
@@ -40,17 +47,20 @@ namespace PodNoms.Api {
             services.Configure<AppSettings>(Configuration.GetSection("App"));
             services.Configure<AudioStorageSettings>(Configuration.GetSection("AudioStorage"));
 
-            services.AddAuthentication(options => {
+            services.AddAuthentication(options =>
+            {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultSignInScheme = JwtBearerDefaults.AuthenticationScheme;
             });
 
-            services.AddJwtBearerAuthentication(options => {
+            services.AddJwtBearerAuthentication(options =>
+            {
                 /* configure options.TokenValidationParameters */
                 options.Audience = Configuration["auth0:clientId"];
                 options.Authority = $"https://{Configuration["auth0:domain"]}/";
-                options.Events = new JwtBearerEvents() {
+                options.Events = new JwtBearerEvents()
+                {
                     OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
                 };
             });
@@ -61,21 +71,25 @@ namespace PodNoms.Api {
                 .RequireAuthenticatedUser()
                 .Build();
 
-            services.AddAuthorization(j => {
+            services.AddAuthorization(j =>
+            {
                 j.DefaultPolicy = defaultPolicy;
             });
 
-            services.AddMvc().AddJsonOptions(options => {
+            services.AddMvc().AddJsonOptions(options =>
+            {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
             });
 
-            services.AddHangfire(config => {
+            services.AddHangfire(config =>
+            {
                 config.UseSqlServerStorage(Configuration["ConnectionStrings:Default"]);
                 config.UseColouredConsoleLogProvider();
             });
 
-            services.AddCors(options => {
+            services.AddCors(options =>
+            {
                 options.AddPolicy("AllowAllOrigins",
                     builder => builder
                     .AllowAnyOrigin()
@@ -100,11 +114,15 @@ namespace PodNoms.Api {
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env,
-            ILoggerFactory loggerFactory, IServiceProvider serviceProvider) {
+            ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
+        {
 
-            if (env.IsDevelopment()) {
+            if (env.IsDevelopment())
+            {
                 app.UseDeveloperExceptionPage();
-            } else {
+            }
+            else
+            {
                 app.UseExceptionHandler("/Home/Error");
             }
 
@@ -116,7 +134,8 @@ namespace PodNoms.Api {
             app.UseHangfireDashboard();
 
             app.UseCors("AllowAllOrigins");
-            app.UseMvc(routes => {
+            app.UseMvc(routes =>
+            {
                 routes.MapRoute(
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");

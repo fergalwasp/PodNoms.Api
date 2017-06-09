@@ -19,27 +19,27 @@ namespace PodNoms.Api.Controllers.api {
     //[Authorize]
     [Route("api/[controller]")]
     public class PodcastController : Controller {
-        private readonly IPodcastRepository podcastRepository;
-        private readonly IUserRepository userRepository;
-        private readonly IOptions<AppSettings> options;
-        private readonly IMapper mapper;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly IPodcastRepository _repository;
+        private readonly IUserRepository _userRepository;
+        private readonly IOptions<AppSettings> _options;
+        private readonly IMapper _mapper;
+        private readonly IUnitOfWork _uow;
 
-        public PodcastController(IPodcastRepository podcastRepository, IUserRepository userRepository,
+        public PodcastController(IPodcastRepository repository, IUserRepository userRepository,
             IOptions<AppSettings> options, IMapper mapper, IUnitOfWork unitOfWork) {
-            this.unitOfWork = unitOfWork;
-            this.podcastRepository = podcastRepository;
-            this.userRepository = userRepository;
-            this.options = options;
-            this.mapper = mapper;
+            this._uow = unitOfWork;
+            this._repository = repository;
+            this._userRepository = userRepository;
+            this._options = options;
+            this._mapper = mapper;
         }
 
         [HttpGet]
         public async Task<IEnumerable<PodcastResource>> Get() {
             var email = "fergal.moran@gmail.com"; //User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ? .Value;
             if (!string.IsNullOrEmpty(email)) {
-                var podcasts = await podcastRepository.GetAllAsync(email);
-                return mapper.Map<List<Podcast>, List<PodcastResource>>(podcasts.ToList());
+                var podcasts = await _repository.GetAllAsync(email);
+                return _mapper.Map<List<Podcast>, List<PodcastResource>>(podcasts.ToList());
             }
             throw new Exception("This is bollocks!");
         }
@@ -47,16 +47,16 @@ namespace PodNoms.Api.Controllers.api {
         [HttpPost]
         public async Task<IActionResult> CreatePodcast([FromBody] PodcastResource podcast) {
             var email = "fergal.moran@gmail.com"; //User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email) ? .Value;
-            var user = userRepository.Get(email);
+            var user = _userRepository.Get(email);
             if (string.IsNullOrEmpty(email) || user == null)
                 return new BadRequestObjectResult("Unable to look up user profile");
 
             if (ModelState.IsValid) {
-                var item = mapper.Map<PodcastResource, Podcast>(podcast);
+                var item = _mapper.Map<PodcastResource, Podcast>(podcast);
                 item.User = user;
-                var ret = await podcastRepository.AddOrUpdateAsync(item);
-                await unitOfWork.CompleteAsync();
-                return new OkObjectResult(mapper.Map<Podcast, PodcastResource>(ret));
+                var ret = await _repository.AddOrUpdateAsync(item);
+                await _uow.CompleteAsync();
+                return new OkObjectResult(_mapper.Map<Podcast, PodcastResource>(ret));
             }
             return BadRequest("Invalid request data");
         }

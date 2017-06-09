@@ -2,10 +2,12 @@ using System.Runtime.Serialization;
 
 namespace PodNoms.Api.Models {
     public enum ProcessingStatus {
-        Waiting,
-        Accepted,
-        Processing,
-        Processed
+        Accepted, //0
+        Downloading, //1
+        Processing, //2
+        Uploading, //3
+        Processed, //4
+        Failed //5
     }
     public class PodcastEntry : BaseModel {
 

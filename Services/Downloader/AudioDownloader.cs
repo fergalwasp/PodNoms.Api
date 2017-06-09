@@ -18,20 +18,20 @@ namespace PodNoms.Api.Services.Downloader {
         public event EventHandler<String> PostProcessing;
         public AudioDownloader(string url) {
             this.url = url;
-        }
-        public void Dispose() {
+            }
+            public void Dispose() {
 
-        }
-        public (string, string) DownloadAudio() {
+            }
+            public(string, string) DownloadAudio() {
             var outputFileName = $"{Guid.NewGuid().ToString()}.mp3";
             var outputFile = Path.Combine(Path.GetTempPath(), outputFileName);
             var proc = new Process {
                 StartInfo = new ProcessStartInfo {
                     FileName = "youtube-dl",
-                        Arguments = $"-o {outputFile} --audio-format mp3 -x \"{this.url}\"",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
+                    Arguments = $"-o {outputFile} --audio-format mp3 -x \"{this.url}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
                 }
             };
 
@@ -40,31 +40,31 @@ namespace PodNoms.Api.Services.Downloader {
             while (!proc.StandardOutput.EndOfStream) {
                 string output = proc.StandardOutput.ReadLine();
                 if (output.Contains("%")) {
-                    var progress = _parseProgress(output);
-                    if (DownloadProgress != null) {
-                        DownloadProgress(this, progress);
-                    }
-                } else {
-                    if (PostProcessing != null) {
-                        PostProcessing(this, output);
-                    }
+                var progress = _parseProgress(output);
+                if (DownloadProgress != null) {
+                DownloadProgress(this, progress);
                 }
-            }
+                } else {
+                if (PostProcessing != null) {
+                PostProcessing(this, output);
+                }
+                }
+                }
 
-            if (File.Exists(outputFile)) {
+                if (File.Exists(outputFile)) {
                 return (outputFile, outputFileName);
-            }
-            return (string.Empty, string.Empty);
-        }
+                }
+                return (string.Empty, string.Empty);
+                }
 
-        public void DownloadInfo() {
-            var proc = new Process {
+                public void DownloadInfo() {
+                var proc = new Process {
                 StartInfo = new ProcessStartInfo {
-                    FileName = "youtube-dl",
-                        Arguments = $"-j {this.url}",
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        CreateNoWindow = true
+                FileName = "youtube-dl",
+                Arguments = $"-j {this.url}",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                CreateNoWindow = true
                 }
             };
 

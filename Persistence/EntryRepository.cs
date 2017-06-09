@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +17,12 @@ namespace PodNoms.Api.Persistence {
             var entry = await context.PodcastEntries
                 .SingleOrDefaultAsync(e => e.Id == id);
             return entry;
+        }
+        public async Task<IEnumerable<PodcastEntry>> GetAllAsync(int podcastId) {
+            var entries = await context.PodcastEntries
+                .Where(e => e.PodcastId == podcastId)
+                .ToListAsync();
+            return entries;
         }
         public async Task<PodcastEntry> AddAsync(PodcastEntry entry) {
             var result = await context.PodcastEntries.AddAsync(entry);
