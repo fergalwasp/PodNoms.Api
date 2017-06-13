@@ -7,6 +7,9 @@
     <UserSecretsId>PODNOMS-SECRETS-2adb1450-b888-4c6f-ab69-c2a1ac7d1f05</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources/*.xml" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="6.0.2" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="2.0.1" />
     <PackageReference Include="Handlebars.NetStandard" Version="1.8.1" />

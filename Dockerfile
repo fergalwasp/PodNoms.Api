@@ -1,11 +1,11 @@
-FROM microsoft/dotnet:latest
+FROM microsoft/aspnetcore:2.0
 
-COPY . /app
-WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y  \
+        youtube-dl
 
-RUN ["dotnet", "restore"]
-RUN ["dotnet", "build"]
-
+COPY bin/Debug/netcoreapp2.0/publish/ /app
 EXPOSE 5000/tcp
+WORKDIR /app/
 
-CMD ["dotnet", "run", "--server.urls", "http://*:5000"]
+CMD ["dotnet", "PodNoms.Api.dll"]

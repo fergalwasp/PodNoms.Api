@@ -36,16 +36,17 @@ namespace PodNoms.Api
         public void ConfigureServices(IServiceCollection services)
         {
 
-            services.AddAutoMapper(e => {
-                e.AddProfile(new MappingProvider());
-            });
-
             services.AddDbContext<PodnomsDbContext>(options =>
                 options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("App"));
             services.Configure<AudioStorageSettings>(Configuration.GetSection("AudioStorage"));
+
+            services.AddAutoMapper(e =>
+            {
+                e.AddProfile(new MappingProvider(Configuration));
+            });
 
             services.AddAuthentication(options =>
             {

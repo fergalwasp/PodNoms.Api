@@ -26,7 +26,7 @@ namespace PodNoms.Api.Controllers.api {
         }
 
         [HttpGet("{slug}")]
-        [Produces("application/xml")]
+        // [Produces("application/xml")]
         public async Task<string> Get(string slug) {
             var podcast = await _repository.GetAsync(slug);
             if (podcast != null) {
@@ -37,7 +37,7 @@ namespace PodNoms.Api.Controllers.api {
                     Title = podcast.Title,
                         Description = podcast.Description,
                         Author = "PodNoms Podcasts",
-                        Link = $"{_options.Value.SiteUrl}/podcast/{podcast.Id}",
+                        Link = $"{_options.Value.RssUrl}/podcast/{podcast.Id}",
                         ImageUrl = podcast.ImageUrl,
                         PublishDate = podcast.CreateDate.ToRFC822String(),
                         Language = "en-IE",
