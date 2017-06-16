@@ -1,4 +1,5 @@
 FROM microsoft/aspnetcore:2.0
+ENV ASPNETCORE_URLS=http://+:5000
 
 RUN apt-get update \
     && apt-get install -y  \

@@ -38,7 +38,12 @@ namespace PodNoms.Api.Controllers.api {
         [HttpGet]
         [RouteAttribute("insecure")]
         public string PingInsecure() {
-            return "Hello Sailor";
+            return "Pong";
+        }
+
+        [HttpGet]
+        public string Ping() {
+            return "Pong";
         }
     }
 }

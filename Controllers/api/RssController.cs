@@ -11,7 +11,7 @@ using PodNoms.Api.Utils;
 using PodNoms.Api.Utils.Extensions;
 
 namespace PodNoms.Api.Controllers.api {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class RssController : Controller {
         private readonly IPodcastRepository _repository;
         private readonly IOptions<AppSettings> _options;
@@ -26,8 +26,8 @@ namespace PodNoms.Api.Controllers.api {
         }
 
         [HttpGet("{slug}")]
-        // [Produces("application/xml")]
-        public async Task<string> Get(string slug) {
+        [Produces("application/xml")]
+        public async Task<IActionResult> Get(string slug) {
             var podcast = await _repository.GetAsync(slug);
             if (podcast != null) {
                 string xml = ResourceReader.ReadResource("podcast.xml", _logger);
@@ -52,9 +52,9 @@ namespace PodNoms.Api.Controllers.api {
                         }).ToList()
                 };
                 var result = template(compiled);
-                return result;
+                return Ok(result);
             }
-            return "";
+            return NotFound();
         }
     }
 }

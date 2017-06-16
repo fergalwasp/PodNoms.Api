@@ -81,7 +81,9 @@ namespace PodNoms.Api
             {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
-            });
+            })
+            .AddXmlSerializerFormatters()
+            .AddXmlDataContractSerializerFormatters();
 
             services.AddHangfire(config =>
             {
@@ -127,13 +129,23 @@ namespace PodNoms.Api
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            Console.WriteLine("Performing migrations");
+            using (var context = new PodnomsDbContext(
+                app.ApplicationServices.GetRequiredService<DbContextOptions<PodnomsDbContext>>()))
+            {
+                context.Database.Migrate();
+            }
+            Console.WriteLine("Successfully migrated");
+
             app.UseStaticFiles();
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
 
-            app.UseHangfireServer();
-            app.UseHangfireDashboard();
-
+            if (env.IsProduction())
+            {
+                app.UseHangfireServer();
+                app.UseHangfireDashboard();
+            }
             app.UseCors("AllowAllOrigins");
             app.UseMvc(routes =>
             {
