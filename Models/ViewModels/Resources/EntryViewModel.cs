@@ -1,5 +1,5 @@
-namespace PodNoms.Api.Controllers.Resources {
-    public class EntryResource {
+namespace PodNoms.Api.Models.ViewModels {
+    public class EntryViewModel {
         public int Id { get; set; }
         public int PodcastId { get; set; }
         public string Uid { get; set; }
@@ -11,7 +11,7 @@ namespace PodNoms.Api.Controllers.Resources {
         public string AudioUrl { get; set; }
         public float AudioLength { get; set; }
         public long AudioFileSize { get; set; }
-        public string ImageUrl { get; set; }
+        public string Image { get; set; }
         public string ProcessingStatus { get; set; }
         public bool Processed { get; set; }
         public string ProcessingPayload { get; set; }

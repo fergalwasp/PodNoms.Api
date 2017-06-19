@@ -8,7 +8,7 @@ namespace PodNoms.Api.Models.ViewModels.RssViewModels
         public string Description { get; set; }
         public string Author { get; set; }
         public string Link { get; set; }
-        public string ImageUrl { get; set; }
+        public string Image { get; set; }
         public string PublishDate { get; set; }
         public string Language { get; set; }
         public string Copyright { get; set; }

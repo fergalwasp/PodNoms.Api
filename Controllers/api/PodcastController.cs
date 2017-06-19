@@ -9,7 +9,6 @@ using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using PodNoms.Api.Controllers.Resources;
 using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
@@ -39,13 +38,24 @@ namespace PodNoms.Api.Controllers.api
         }
 
         [HttpGet]
-        public async Task<IEnumerable<PodcastResource>> Get()
+        public async Task<IEnumerable<PodcastViewModel>> Get()
         {
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             if (!string.IsNullOrEmpty(email))
             {
                 var podcasts = await _repository.GetAllAsync(email);
-                return _mapper.Map<List<Podcast>, List<PodcastResource>>(podcasts.ToList());
+                return _mapper.Map<List<Podcast>, List<PodcastViewModel>>(podcasts.ToList());
+            }
+            throw new Exception("This is bollocks!");
+        }
+
+        [HttpGet("{slug}")]
+        public async Task<PodcastViewModel> Get(string slug){
+            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
+            if (!string.IsNullOrEmpty(email))
+            {
+                var podcast = await _repository.GetAsync(email, slug);
+                return _mapper.Map<Podcast, PodcastViewModel>(podcast);
             }
             throw new Exception("This is bollocks!");
         }
@@ -60,7 +70,7 @@ namespace PodNoms.Api.Controllers.api
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePodcast([FromBody] PodcastResource podcast)
+        public async Task<IActionResult> CreatePodcast([FromBody] PodcastViewModel podcast)
         {
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             var user = _userRepository.Get(email);
@@ -69,12 +79,12 @@ namespace PodNoms.Api.Controllers.api
 
             if (ModelState.IsValid)
             {
-                var item = _mapper.Map<PodcastResource, Podcast>(podcast);
+                var item = _mapper.Map<PodcastViewModel, Podcast>(podcast);
                 item.User = user;
 
                 var ret = await _repository.AddOrUpdateAsync(item);
                 await _uow.CompleteAsync();
-                return new OkObjectResult(_mapper.Map<Podcast, PodcastResource>(ret));
+                return new OkObjectResult(_mapper.Map<Podcast, PodcastViewModel>(ret));
             }
             return BadRequest("Invalid request data");
         }

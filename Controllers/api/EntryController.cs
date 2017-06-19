@@ -6,8 +6,8 @@ using AutoMapper;
 using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using PodNoms.Api.Controllers.Resources;
 using PodNoms.Api.Models;
+using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Processor.Hangfire;
 
@@ -32,16 +32,16 @@ namespace PodNoms.Api.Controllers.api
         }
 
         [HttpGet("all/{podcastId}")]
-        public async Task<IEnumerable<EntryResource>> Get(int podcastId)
+        public async Task<IEnumerable<EntryViewModel>> Get(int podcastId)
         {
             var entries = await _repository.GetAllAsync(podcastId);
-            return _mapper.Map<List<PodcastEntry>, List<EntryResource>>(entries.ToList());
+            return _mapper.Map<List<PodcastEntry>, List<EntryViewModel>>(entries.ToList());
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddEntry([FromBody] EntryResource item)
+        public async Task<IActionResult> AddEntry([FromBody] EntryViewModel item)
         {
-            var entry = _mapper.Map<EntryResource, PodcastEntry>(item);
+            var entry = _mapper.Map<EntryViewModel, PodcastEntry>(item);
             await _repository.AddAsync(entry);
             await _uow.CompleteAsync();
 
@@ -60,7 +60,7 @@ namespace PodNoms.Api.Controllers.api
             {
                 await _uow.CompleteAsync();
             }
-            var result = _mapper.Map<PodcastEntry, EntryResource>(entry);
+            var result = _mapper.Map<PodcastEntry, EntryViewModel>(entry);
             return Ok(result);
         }
 

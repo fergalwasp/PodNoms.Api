@@ -7,6 +7,7 @@ namespace PodNoms.Api.Models
     {
         Task<Podcast> GetAsync(int id);
         Task<Podcast> GetAsync(string slug);
+        Task<Podcast> GetAsync(string email, string slug);
         Task<IEnumerable<Podcast>> GetAllAsync();
         Task<IEnumerable<Podcast>> GetAllAsync(string emailAddress);
         Task<Podcast> AddOrUpdateAsync(Podcast item);

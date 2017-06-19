@@ -10,7 +10,7 @@ using System;
 namespace PodNoms.Api.Migrations
 {
     [DbContext(typeof(PodnomsDbContext))]
-    [Migration("20170524191202_Initial")]
+    [Migration("20170619210738_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,7 +28,7 @@ namespace PodNoms.Api.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("ImageUrl");
+                    b.Property<string>("Image");
 
                     b.Property<string>("Slug");
 
@@ -62,7 +62,7 @@ namespace PodNoms.Api.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("ImageUrl");
+                    b.Property<string>("Image");
 
                     b.Property<int>("PodcastId");
 
@@ -84,9 +84,7 @@ namespace PodNoms.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PodcastId", "SourceUrl")
-                        .IsUnique()
-                        .HasAnnotation("SqlServer:Filter", "[SourceUrl] IS NOT NULL");
+                    b.HasIndex("PodcastId");
 
                     b.ToTable("PodcastEntries");
                 });

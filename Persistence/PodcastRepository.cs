@@ -26,6 +26,15 @@ namespace PodNoms.Api.Models
 
             return ret;
         }
+        public async Task<Podcast> GetAsync(string email, string slug)
+        {
+            var ret = await context.Podcasts
+                .Where(p => p.Slug == slug && p.User.EmailAddress == email)
+                .Include(e => e.PodcastEntries)
+                .FirstOrDefaultAsync();
+
+            return ret;
+        }
         public async Task<Podcast> GetAsync(string slug)
         {
             var ret = await context.Podcasts
@@ -60,7 +69,7 @@ namespace PodNoms.Api.Models
             }
             else
             {
-                item.ImageUrl = await ImageUtils.GetRemoteImageAsBase64($"http://lorempixel.com/400/200/?{System.Guid.NewGuid().ToString()}");
+                item.Image = await ImageUtils.GetRemoteImageAsBase64($"http://lorempixel.com/400/200/?{System.Guid.NewGuid().ToString()}");
                 context.Podcasts.Add(item);
                 if (string.IsNullOrEmpty(item.Slug) && !string.IsNullOrEmpty(item.Title))
                 {

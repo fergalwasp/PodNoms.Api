@@ -38,7 +38,7 @@ namespace PodNoms.Api.Controllers.api {
                         Description = podcast.Description,
                         Author = "PodNoms Podcasts",
                         Link = $"{_options.Value.RssUrl}/podcast/{podcast.Id}",
-                        ImageUrl = podcast.ImageUrl,
+                        Image = podcast.Image,
                         PublishDate = podcast.CreateDate.ToRFC822String(),
                         Language = "en-IE",
                         Copyright = $"© {DateTime.Now.Year} PodNoms",

@@ -27,7 +27,7 @@ namespace PodNoms.Api.Persistence {
             // Used only for EF .NET Core CLI tools (update database/migrations etc.)
             //TODO: This FUCKING SUCKS!!!
             var optionsBuilder = new DbContextOptionsBuilder<PodnomsDbContext>()
-                .UseSqlServer("server=localhost;database=PodNoms;user id=sa;password=MyComplexPassword!234");
+                .UseSqlServer("server=localhost;database=PodNoms;user id=sa;password=cTXu1nJLCpC/c");
 
             return new PodnomsDbContext(optionsBuilder.Options);
         }

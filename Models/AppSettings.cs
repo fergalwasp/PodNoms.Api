@@ -11,5 +11,6 @@ namespace PodNoms.Api.Models
         public string ConnectionString { get; set; }
         public string Container { get; set; }
         public string CdnUrl { get; set; }
+
     }
 }

@@ -37,7 +37,7 @@ namespace PodNoms.Api.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     CreateDate = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: true),
-                    ImageUrl = table.Column<string>(nullable: true),
+                    Image = table.Column<string>(nullable: true),
                     Slug = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     UpdateDate = table.Column<DateTime>(nullable: false),
@@ -66,7 +66,7 @@ namespace PodNoms.Api.Migrations
                     Author = table.Column<string>(nullable: true),
                     CreateDate = table.Column<DateTime>(nullable: false),
                     Description = table.Column<string>(nullable: true),
-                    ImageUrl = table.Column<string>(nullable: true),
+                    Image = table.Column<string>(nullable: true),
                     PodcastId = table.Column<int>(nullable: false),
                     Processed = table.Column<bool>(nullable: false),
                     ProcessingPayload = table.Column<string>(nullable: true),
@@ -94,11 +94,9 @@ namespace PodNoms.Api.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PodcastEntries_PodcastId_SourceUrl",
+                name: "IX_PodcastEntries_PodcastId",
                 table: "PodcastEntries",
-                columns: new[] { "PodcastId", "SourceUrl" },
-                unique: true,
-                filter: "[SourceUrl] IS NOT NULL");
+                column: "PodcastId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

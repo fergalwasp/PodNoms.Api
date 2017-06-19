@@ -27,7 +27,7 @@ namespace PodNoms.Api.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("ImageUrl");
+                    b.Property<string>("Image");
 
                     b.Property<string>("Slug");
 
@@ -61,7 +61,7 @@ namespace PodNoms.Api.Migrations
 
                     b.Property<string>("Description");
 
-                    b.Property<string>("ImageUrl");
+                    b.Property<string>("Image");
 
                     b.Property<int>("PodcastId");
 

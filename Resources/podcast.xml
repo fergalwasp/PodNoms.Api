@@ -5,7 +5,7 @@
     <description> {{description}} </description>
     <itunes:author>{{author}} </itunes:author>
     <link>{{link}}</link>
-    <itunes:image href="{{imageUrl}}" />
+    <itunes:image href="{{image}}" />
     <pubDate> {{publishDate}} </pubDate>
     <language>{{language}}</language>
     <copyright>{{copyright}}</copyright>

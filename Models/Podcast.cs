@@ -8,7 +8,7 @@ namespace PodNoms.Api.Models {
         public string Title { get; set; }
         public string Description { get; set; }
         public string Slug { get; set; }
-        public string ImageUrl { get; set; }
+        public string Image { get; set; }
         public ICollection<PodcastEntry> PodcastEntries { get; set; }
         public Podcast() {
             PodcastEntries = new Collection<PodcastEntry>();

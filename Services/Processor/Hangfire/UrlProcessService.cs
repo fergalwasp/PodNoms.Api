@@ -9,8 +9,8 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
-using PodNoms.Api.Controllers.Resources;
 using PodNoms.Api.Models;
+using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Downloader;
 using PodNoms.Api.Utils.Azure;
@@ -58,7 +58,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire
         #region Internals
         private async Task<bool> _sendPusherUpdate(PodcastEntry entry)
         {
-            var result = _mapper.Map<PodcastEntry, EntryResource>(entry);
+            var result = _mapper.Map<PodcastEntry, EntryViewModel>(entry);
             var jobj = JObject.FromObject(result, this._serializer);
             return await _sendPusherUpdate(entry.Uid, "info_processed", jobj);
         }
@@ -95,7 +95,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire
                 entry.Title = downloader.Properties?.title;
                 entry.Description = downloader.Properties?.description;
                 entry.Author = downloader.Properties?.uploader;
-                entry.ImageUrl = downloader.Properties?.thumbnail;
+                entry.Image = downloader.Properties?.thumbnail;
                 entry.ProcessingStatus = ProcessingStatus.Processing;
 
                 await _unitOfWork.CompleteAsync();

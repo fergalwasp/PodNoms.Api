@@ -36,12 +36,15 @@ namespace PodNoms.Api
         public void ConfigureServices(IServiceCollection services)
         {
 
+            Console.WriteLine(Configuration["ConnectionStrings:Default"]);
+            
             services.AddDbContext<PodnomsDbContext>(options =>
                 options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("App"));
             services.Configure<AudioStorageSettings>(Configuration.GetSection("AudioStorage"));
+            services.Configure<ImageSettings>(Configuration.GetSection("PhotoSettings"));
 
             services.AddAutoMapper(e =>
             {
@@ -141,7 +144,7 @@ namespace PodNoms.Api
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
 
-            if (env.IsProduction())
+            if (true) //env.IsProduction())
             {
                 app.UseHangfireServer();
                 app.UseHangfireDashboard();

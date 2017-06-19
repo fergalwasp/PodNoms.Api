@@ -21,7 +21,7 @@ namespace PodNoms.Api.Models {
         public string AudioUrl { get; set; }
         public float AudioLength { get; set; }
         public long AudioFileSize { get; set; }
-        public string ImageUrl { get; set; }
+        public string Image { get; set; }
         public string ProcessingPayload { get; set; }
         public ProcessingStatus ProcessingStatus { get; set; } = ProcessingStatus.Accepted;
         public bool Processed { get; set; }
