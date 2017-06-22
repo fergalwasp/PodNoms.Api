@@ -15,6 +15,7 @@
         <description>{{description}}</description>
         <itunes:author>{{author}}</itunes:author>
         <itunes:summary>{{description}}</itunes:summary>
+        <summary>{{description}}</summary>
         <pubDate> {{updateDate}}</pubDate>
         <enclosure url="{{audioUrl}}" length="{{audioFileSize}}" type="audio/mpeg" /> 
     </item>

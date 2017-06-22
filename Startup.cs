@@ -33,6 +33,7 @@ namespace PodNoms.Api
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            
         }
 
         public void ConfigureServices(IServiceCollection services)
