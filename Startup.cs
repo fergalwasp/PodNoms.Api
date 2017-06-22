@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.Formatters.Xml;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using PodNoms.Api.Models;
@@ -21,6 +22,7 @@ using PodNoms.Api.Services;
 using PodNoms.Api.Services.Auth;
 using PodNoms.Api.Services.Processor.Hangfire;
 using PodNoms.Api.Utils.Azure;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 namespace PodNoms.Api
 {
@@ -80,13 +82,13 @@ namespace PodNoms.Api
                 j.DefaultPolicy = defaultPolicy;
             });
 
-            services.AddMvc().AddJsonOptions(options =>
-            {
+            services.AddMvc(options => {
+                options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+            }).AddJsonOptions(options => {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
-            })
-            .AddXmlSerializerFormatters()
-            .AddXmlDataContractSerializerFormatters();
+               
+            }).AddXmlSerializerFormatters();
 
             services.AddHangfire(config =>
             {

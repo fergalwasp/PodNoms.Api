@@ -27,7 +27,9 @@ namespace PodNoms.Api.Controllers.api {
 
         [HttpGet("{slug}")]
         [Produces("application/xml")]
-        public async Task<IActionResult> Get(string slug) {
+        public async Task<string> Get(string slug) {
+            return "Hello Sailor";
+            /* 
             var podcast = await _repository.GetAsync(slug);
             if (podcast != null) {
                 string xml = ResourceReader.ReadResource("podcast.xml", _logger);
@@ -52,9 +54,10 @@ namespace PodNoms.Api.Controllers.api {
                         }).ToList()
                 };
                 var result = template(compiled);
-                return Ok(result);
+                return new OkObjectResult(result);
             }
             return NotFound();
+            */
         }
     }
 }
