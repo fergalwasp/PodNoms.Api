@@ -46,25 +46,27 @@ namespace PodNoms.Api.Controllers.api
                 var podcasts = await _repository.GetAllAsync(email);
                 return _mapper.Map<List<Podcast>, List<PodcastViewModel>>(podcasts.ToList());
             }
-            throw new Exception("This is bollocks!");
+            throw new Exception("No local user stored!");
         }
 
         [HttpGet("{slug}")]
-        public async Task<PodcastViewModel> Get(string slug){
+        public async Task<PodcastViewModel> Get(string slug)
+        {
             var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
             if (!string.IsNullOrEmpty(email))
             {
                 var podcast = await _repository.GetAsync(email, slug);
                 return _mapper.Map<Podcast, PodcastViewModel>(podcast);
             }
-            throw new Exception("This is bollocks!");
+            throw new Exception("No local user stored!");
         }
 
         [HttpGet("rssurl/{slug}")]
         public async Task<IActionResult> GetRssUrl(string slug)
         {
             var item = await _repository.GetAsync(slug);
-            return new OkObjectResult(new {
+            return new OkObjectResult(new
+            {
                 Url = $"{_settings.Value.RssUrl}{item.Slug}"
             });
         }
@@ -87,6 +89,14 @@ namespace PodNoms.Api.Controllers.api
                 return new OkObjectResult(_mapper.Map<Podcast, PodcastViewModel>(ret));
             }
             return BadRequest("Invalid request data");
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await this._repository.DeleteAsync(id);
+            await _uow.CompleteAsync();
+            return Ok();
         }
     }
 }

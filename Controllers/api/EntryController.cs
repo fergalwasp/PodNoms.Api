@@ -69,7 +69,6 @@ namespace PodNoms.Api.Controllers.api
         {
             await this._repository.DeleteAsync(id);
             await _uow.CompleteAsync();
-
             return Ok();
         }
     }

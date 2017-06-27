@@ -94,9 +94,16 @@ namespace PodNoms.Api.Services.Processor.Hangfire
             {
                 entry.Title = downloader.Properties?.title;
                 entry.Description = downloader.Properties?.description;
-                entry.Author = downloader.Properties?.uploader;
                 entry.Image = downloader.Properties?.thumbnail;
                 entry.ProcessingStatus = ProcessingStatus.Processing;
+                try
+                {
+                    entry.Author = downloader.Properties?.uploader;
+                }
+                catch (Exception)
+                {
+                    _logger.LogWarning($"Unable to extract downloader info for: {entry.SourceUrl}");
+                }
 
                 await _unitOfWork.CompleteAsync();
 
@@ -141,7 +148,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire
             {
                 entry.ProcessingStatus = ProcessingStatus.Uploading;
                 await _sendPusherUpdate(entry);
-                
+
                 var cdnFile = await _fileUploader.UploadFile(sourceFile, fileName);
                 entry.AudioUrl = cdnFile;
                 entry.ProcessingStatus = ProcessingStatus.Processed;

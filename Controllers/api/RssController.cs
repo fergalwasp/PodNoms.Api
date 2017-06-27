@@ -85,7 +85,8 @@ namespace PodNoms.Api.Controllers.api
                 };
                 var result = template(compiled);
                 var rss = RssDocument.Load(result);
-                return new OkObjectResult(rss);
+                //return new OkObjectResult(rss);
+                return Content(result, "application/xml");
             }
             return NotFound();
         }

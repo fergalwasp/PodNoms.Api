@@ -47,7 +47,7 @@ namespace PodNoms.Api
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("App"));
             services.Configure<AudioStorageSettings>(Configuration.GetSection("AudioStorage"));
-            services.Configure<ImageSettings>(Configuration.GetSection("PhotoSettings"));
+            services.Configure<ImageSettings>(Configuration.GetSection("ImageSettings"));
 
             services.AddAutoMapper(e =>
             {

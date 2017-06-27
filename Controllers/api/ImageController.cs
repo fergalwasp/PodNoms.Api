@@ -11,8 +11,8 @@ using PodNoms.Api.Utils;
 
 namespace PodNoms.Api.Controllers.api
 {
-    [Authorize]
-    [Route("/api/podcast/{slug}/image")]
+    //[Authorize]
+    [Route("/api/podcast/{id}/image")]
     public class ImageController : Controller
     {
         private readonly IPodcastRepository _repository;
@@ -27,16 +27,15 @@ namespace PodNoms.Api.Controllers.api
             this._unitOfWork = unitOfWork;
         }
         [HttpPost]
-        public async Task<IActionResult> Upload(string slug, IFormFile file)
+        public async Task<IActionResult> Upload(int id, IFormFile file)
         {
-            var email = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-            var podcast = await _repository.GetAsync(email, slug);
-            if (podcast == null)
-                return NotFound();
-
             if (file == null || file.Length == 0) return BadRequest("No file found in stream");
             if (file.Length > _imageSettings.MaxUploadFileSize) return BadRequest("Maximum file size exceeded");
             if (!_imageSettings.IsSupported(file.FileName)) return BadRequest("Invalid file type");
+
+            var podcast = await _repository.GetAsync(id);
+            if (podcast == null)
+                return NotFound();
 
             var path = Path.GetTempPath();
             var fileName = Path.Combine(path, System.Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
