@@ -21,11 +21,11 @@ namespace PodNoms.Api.Controllers.api
         private readonly IPodcastRepository _repository;
         private readonly ILogger _logger;
         private readonly AppSettings _appOptions;
-        private readonly AudioStorageSettings _storageOptions;
+        private readonly StorageSettings _storageOptions;
 
         public RssController(IPodcastRepository repository,
             IOptions<AppSettings> appOptions,
-            IOptions<AudioStorageSettings> storageOptions,
+            IOptions<StorageSettings> storageOptions,
             ILoggerFactory loggerFactory)
         {
             _repository = repository;

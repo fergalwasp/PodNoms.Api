@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using PodNoms.Api.Models;
+using PodNoms.Api.Services;
+using PodNoms.Api.Services.Storage;
 using PodNoms.Api.Utils;
 
 namespace PodNoms.Api.Controllers.api
@@ -18,10 +20,12 @@ namespace PodNoms.Api.Controllers.api
         private readonly IPodcastRepository _repository;
         private IUnitOfWork _unitOfWork;
         private readonly ImageSettings _imageSettings;
+        private readonly IImageStorage _imageStorage;
 
-        public ImageController(IPodcastRepository repository, IUnitOfWork unitOfWork,
+        public ImageController(IPodcastRepository repository, IUnitOfWork unitOfWork, IImageStorage imageStorage,
                                 IOptions<ImageSettings> imageSettings)
         {
+            this._imageStorage = imageStorage;
             this._imageSettings = imageSettings.Value;
             this._repository = repository;
             this._unitOfWork = unitOfWork;
@@ -37,13 +41,8 @@ namespace PodNoms.Api.Controllers.api
             if (podcast == null)
                 return NotFound();
 
-            var path = Path.GetTempPath();
-            var fileName = Path.Combine(path, System.Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
-            using (var stream = new FileStream(fileName, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-            podcast.Image = await ImageUtils.ImageAsBase64(fileName);
+            var imageUrl = await _imageStorage.StoreImage(Path.GetTempPath(), file);
+            podcast.Image = imageUrl;
             await this._unitOfWork.CompleteAsync();
             return Ok();
         }

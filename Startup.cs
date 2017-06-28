@@ -21,8 +21,8 @@ using PodNoms.Api.Providers;
 using PodNoms.Api.Services;
 using PodNoms.Api.Services.Auth;
 using PodNoms.Api.Services.Processor.Hangfire;
-using PodNoms.Api.Utils.Azure;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using PodNoms.Api.Services.Storage;
 
 namespace PodNoms.Api
 {
@@ -46,7 +46,7 @@ namespace PodNoms.Api
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("App"));
-            services.Configure<AudioStorageSettings>(Configuration.GetSection("AudioStorage"));
+            services.Configure<StorageSettings>(Configuration.GetSection("Storage"));
             services.Configure<ImageSettings>(Configuration.GetSection("ImageSettings"));
 
             services.AddAutoMapper(e =>
@@ -110,7 +110,8 @@ namespace PodNoms.Api
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
             services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<IFileUploader, FileUploader>();
+            services.AddTransient<IFileUploader, AzureFileUploader>();
+            services.AddTransient<IImageStorage, AzureImageStorage>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPodcastRepository, PodcastRepository>();
             services.AddScoped<IEntryRepository, EntryRepository>();

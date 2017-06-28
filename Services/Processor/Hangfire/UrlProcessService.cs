@@ -13,7 +13,7 @@ using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Downloader;
-using PodNoms.Api.Utils.Azure;
+using PodNoms.Api.Services.Storage;
 using PusherServer;
 
 namespace PodNoms.Api.Services.Processor.Hangfire
@@ -149,7 +149,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire
                 entry.ProcessingStatus = ProcessingStatus.Uploading;
                 await _sendPusherUpdate(entry);
 
-                var cdnFile = await _fileUploader.UploadFile(sourceFile, fileName);
+                var cdnFile = await _fileUploader.UploadFile(sourceFile, "audio", fileName);
                 entry.AudioUrl = cdnFile;
                 entry.ProcessingStatus = ProcessingStatus.Processed;
                 entry.Processed = true;

@@ -22,7 +22,7 @@ namespace PodNoms.Api.Providers
             CreateMap<PodcastEntry, EntryViewModel>()
                 .ForMember(
                     e => e.AudioUrl,
-                    e => e.MapFrom(m => $"{this._options.GetSection("AudioStorage")["CdnUrl"]}{m.AudioUrl}"));
+                    e => e.MapFrom(m => $"{this._options.GetSection("Storage")["CdnUrl"]}{m.AudioUrl}"));
 
             //API Resource to Domain
             CreateMap<PodcastViewModel, Podcast>();

@@ -6,10 +6,9 @@ namespace PodNoms.Api.Models
         public string RssUrl { get; set; }
     }
 
-    public class AudioStorageSettings
+    public class StorageSettings
     {
         public string ConnectionString { get; set; }
-        public string Container { get; set; }
         public string CdnUrl { get; set; }
 
     }

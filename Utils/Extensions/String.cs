@@ -33,5 +33,15 @@ namespace PodNoms.Api.Utils.Extensions
             byte[] bytes = System.Text.Encoding.GetEncoding("Cyrillic").GetBytes(txt);
             return System.Text.Encoding.ASCII.GetString(bytes);
         }
+
+        public static string UrlParse(this string url, params string[] parts)
+        {
+            url = url.TrimEnd('/');
+            foreach (var u in parts)
+            {
+                url = string.Format("{0}/{1}", url, u.TrimStart('/'));
+            }
+            return url;
+        }
     }
 }
