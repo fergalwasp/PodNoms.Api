@@ -11,9 +11,8 @@ using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels.RssViewModels;
 using PodNoms.Api.Utils;
 using PodNoms.Api.Utils.Extensions;
-using X.Web.RSS;
 
-namespace PodNoms.Api.Controllers.api
+namespace PodNoms.Api.Controllers
 {
     [Route("[controller]")]
     public class RssController : Controller
@@ -65,7 +64,7 @@ namespace PodNoms.Api.Controllers.api
                     Title = podcast.Title,
                     Description = podcast.Description,
                     Author = "PodNoms Podcasts",
-                    Image = podcast.Image,
+                    Image = podcast.ImageUrl,
                     Link = $"{_appOptions.RssUrl}podcast/{podcast.Id}",
                     PublishDate = podcast.CreateDate.ToRFC822String(),
                     Language = "en-IE",
@@ -84,8 +83,6 @@ namespace PodNoms.Api.Controllers.api
                     ).ToList()
                 };
                 var result = template(compiled);
-                var rss = RssDocument.Load(result);
-                //return new OkObjectResult(rss);
                 return Content(result, "application/xml");
             }
             return NotFound();

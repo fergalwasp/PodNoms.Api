@@ -6,9 +6,9 @@ using PodNoms.Api.Models;
 using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
 
-namespace PodNoms.Api.Controllers.api {
+namespace PodNoms.Api.Controllers {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ProfileController : Controller {
         private IUserRepository _userRepository;
 

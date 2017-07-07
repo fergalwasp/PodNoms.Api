@@ -11,9 +11,9 @@ using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Processor.Hangfire;
 
-namespace PodNoms.Api.Controllers.api
+namespace PodNoms.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class EntryController : Controller
     {
         private readonly IEntryRepository _repository;

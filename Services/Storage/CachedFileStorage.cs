@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace PodNoms.Api.Services.Storage
 {
-    public abstract class CachedImagedStorage 
+    public abstract class CachedFileStorage 
     {
         public async Task<string> CacheItem(string path, IFormFile file)
         {

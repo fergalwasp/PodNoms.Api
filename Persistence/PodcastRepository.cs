@@ -69,7 +69,7 @@ namespace PodNoms.Api.Models
             }
             else
             {
-                item.Image = await ImageUtils.GetRemoteImageAsBase64($"http://lorempixel.com/400/200/?{System.Guid.NewGuid().ToString()}");
+                item.ImageUrl = await ImageUtils.GetRemoteImageAsBase64($"http://lorempixel.com/400/200/?{System.Guid.NewGuid().ToString()}");
                 context.Podcasts.Add(item);
                 if (string.IsNullOrEmpty(item.Slug) && !string.IsNullOrEmpty(item.Title))
                 {
