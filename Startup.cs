@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 using AutoMapper;
 using Hangfire;
@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +22,7 @@ using PodNoms.Api.Services.Auth;
 using PodNoms.Api.Services.Processor.Hangfire;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using PodNoms.Api.Services.Storage;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace PodNoms.Api
 {
@@ -33,21 +33,20 @@ namespace PodNoms.Api
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            
+
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
 
-            Console.WriteLine(Configuration["ConnectionStrings:Default"]);
-            
             services.AddDbContext<PodnomsDbContext>(options =>
-                options.UseSqlServer(Configuration["ConnectionStrings:Default"]));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddOptions();
             services.Configure<AppSettings>(Configuration.GetSection("App"));
             services.Configure<StorageSettings>(Configuration.GetSection("Storage"));
-            services.Configure<ImageSettings>(Configuration.GetSection("ImageSettings"));
+            services.Configure<ImageFileStorageSettings>(Configuration.GetSection("ImageFileStorageSettings"));
+            services.Configure<AudioFileStorageSettings>(Configuration.GetSection("AudioFileStorageSettings"));
 
             services.AddAutoMapper(e =>
             {
@@ -71,7 +70,6 @@ namespace PodNoms.Api
                     OnTokenValidated = AuthenticationMiddleware.OnTokenValidated
                 };
             });
-
             var defaultPolicy =
                 new AuthorizationPolicyBuilder()
                 .AddAuthenticationSchemes("Bearer")
@@ -83,17 +81,25 @@ namespace PodNoms.Api
                 j.DefaultPolicy = defaultPolicy;
             });
 
-            services.AddMvc(options => {
+            services.AddMvc(options =>
+            {
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
-            }).AddJsonOptions(options => {
+            }).AddJsonOptions(options =>
+            {
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
-               
+
             }).AddXmlSerializerFormatters();
+
+            services.Configure<FormOptions>(x =>
+            {
+                x.ValueLengthLimit = int.MaxValue;
+                x.MultipartBodyLengthLimit = int.MaxValue; // In case of multipart
+            });
 
             services.AddHangfire(config =>
             {
-                config.UseSqlServerStorage(Configuration["ConnectionStrings:Default"]);
+                config.UseSqlServerStorage(Configuration["ConnectionStrings:DefaultConnection"]);
                 config.UseColouredConsoleLogProvider();
             });
 
@@ -107,11 +113,8 @@ namespace PodNoms.Api
                     .AllowCredentials());
             });
 
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
-            services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<IFileUploader, AzureFileUploader>();
-            services.AddTransient<IImageStorage, AzureImageStorage>();
+            services.AddTransient<IFileStorage, AzureFileStorage>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPodcastRepository, PodcastRepository>();
             services.AddScoped<IEntryRepository, EntryRepository>();
@@ -136,10 +139,11 @@ namespace PodNoms.Api
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            Console.WriteLine("Performing migrations");
+            // Console.WriteLine("Performing migrations");
             using (var context = new PodnomsDbContext(
                 app.ApplicationServices.GetRequiredService<DbContextOptions<PodnomsDbContext>>()))
             {
+                context.Database.EnsureCreated();
                 context.Database.Migrate();
             }
             Console.WriteLine("Successfully migrated");
@@ -148,7 +152,7 @@ namespace PodNoms.Api
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
 
-            if (true) //env.IsProduction())
+            if (env.IsProduction() || true)
             {
                 app.UseHangfireServer();
                 app.UseHangfireDashboard();

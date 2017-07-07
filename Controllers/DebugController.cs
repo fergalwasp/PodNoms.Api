@@ -3,8 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using PodNoms.Api.Models;
 
-namespace PodNoms.Api.Controllers.api {
-    [Route("api/[controller]")]
+namespace PodNoms.Api.Controllers {
+    [Route("[controller]")]
     public class DebugController : Controller {
         private readonly IOptions<StorageSettings> _settings;
 

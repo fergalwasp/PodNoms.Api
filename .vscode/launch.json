@@ -29,6 +29,13 @@
                     "command": "xdg-open"
                 }
             },
+            "logging": {
+                "engineLogging": false,
+                "moduleLoad": false,
+                "browserStdOut": true,
+                "exceptions": true,
+                "programOutput": true
+            },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             },

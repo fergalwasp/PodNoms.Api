@@ -15,10 +15,10 @@ using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Processor.Hangfire;
 using PodNoms.Api.Utils.Extensions;
 #endregion
-namespace PodNoms.Api.Controllers.api
+namespace PodNoms.Api.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class PodcastController : Controller
     {
         private readonly IPodcastRepository _repository;

@@ -94,7 +94,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire
             {
                 entry.Title = downloader.Properties?.title;
                 entry.Description = downloader.Properties?.description;
-                entry.Image = downloader.Properties?.thumbnail;
+                entry.ImageUrl = downloader.Properties?.thumbnail;
                 entry.ProcessingStatus = ProcessingStatus.Processing;
                 try
                 {
@@ -154,7 +154,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire
                 entry.ProcessingStatus = ProcessingStatus.Processed;
                 entry.Processed = true;
                 await _unitOfWork.CompleteAsync();
-
+                File.Delete(sourceFile);
                 var pusherResult = await _sendPusherUpdate(entry);
             }
             return false;

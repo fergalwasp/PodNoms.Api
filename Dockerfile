@@ -9,7 +9,7 @@ RUN apt-get update \
 RUN pip install --upgrade pip
 RUN pip install --upgrade youtube_dl
 
-COPY bin/Debug/netcoreapp2.0/publish/ /app
+COPY bin/Release/netcoreapp2.0/publish/ /app
 EXPOSE 5000/tcp
 WORKDIR /app/
 

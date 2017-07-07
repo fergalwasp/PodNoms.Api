@@ -32,7 +32,7 @@ namespace PodNoms.Api.Services.Storage
                 {
                     await blockBlob.UploadFromStreamAsync(fileStream);
                 }
-                return _settings.Value.CdnUrl.UrlParse(containerName, destinationFile);
+                return $"{containerName}/{destinationFile}";
             }
             catch (Exception ex)
             {
