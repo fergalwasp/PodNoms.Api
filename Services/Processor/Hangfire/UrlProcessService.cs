@@ -154,7 +154,7 @@ namespace PodNoms.Api.Services.Processor.Hangfire
                 entry.ProcessingStatus = ProcessingStatus.Processed;
                 entry.Processed = true;
                 await _unitOfWork.CompleteAsync();
-
+                File.Delete(sourceFile);
                 var pusherResult = await _sendPusherUpdate(entry);
             }
             return false;
