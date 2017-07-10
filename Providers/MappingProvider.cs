@@ -16,9 +16,13 @@ namespace PodNoms.Api.Providers
 
             //Domain to API Resource
             CreateMap<Podcast, PodcastViewModel>()
-            .ForMember(
-                e => e.RssUrl,
-                e => e.MapFrom(m => $"{this._options.GetSection("App")["RssUrl"]}{m.Slug}"));
+                .ForMember(
+                    e => e.RssUrl,
+                    e => e.MapFrom(m => $"{this._options.GetSection("App")["RssUrl"]}{m.Slug}"))
+                .ForMember(
+                    e => e.ImageUrl,
+                    e => e.MapFrom(m => $"{this._options.GetSection("Storage")["CdnUrl"]}{m.ImageUrl}"));
+
             CreateMap<PodcastEntry, EntryViewModel>()
                 .ForMember(
                     e => e.AudioUrl,

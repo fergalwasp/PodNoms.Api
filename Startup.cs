@@ -23,6 +23,7 @@ using PodNoms.Api.Services.Processor.Hangfire;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using PodNoms.Api.Services.Storage;
 using Microsoft.AspNetCore.Http.Features;
+using PodNoms.Api.Services.Realtime;
 
 namespace PodNoms.Api
 {
@@ -115,6 +116,7 @@ namespace PodNoms.Api
 
             services.AddTransient<IFileUploader, AzureFileUploader>();
             services.AddTransient<IFileStorage, AzureFileStorage>();
+            services.AddTransient<IRealTimeUpdater, PusherUpdater>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IPodcastRepository, PodcastRepository>();
             services.AddScoped<IEntryRepository, EntryRepository>();

@@ -14,28 +14,25 @@ using PodNoms.Api.Models.ViewModels;
 using PodNoms.Api.Persistence;
 using PodNoms.Api.Services.Downloader;
 using PodNoms.Api.Services.Storage;
+using PodNoms.Api.Services.Realtime;
 using PusherServer;
 
 namespace PodNoms.Api.Services.Processor.Hangfire
 {
-    public interface IUrlProcessService
-    {
-        Task<bool> GetInformation(int entryId);
-        Task<bool> DownloadAudio(int entryId);
-    }
     public class UrlProcessService : IUrlProcessService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEntryRepository _repository;
         private readonly IConfiguration _config;
         private readonly ILogger _logger;
-        private Pusher _pusher;
         private readonly IFileUploader _fileUploader;
         private readonly IMapper _mapper;
-        private JsonSerializer _serializer;
+        private readonly JsonSerializer _serializer;
+        public readonly IRealTimeUpdater _pusher;
 
         public UrlProcessService(IEntryRepository repository, IUnitOfWork unitOfWork,
-            IConfiguration config, ILoggerFactory logger, IFileUploader fileUploader, IMapper mapper)
+            IConfiguration config, ILoggerFactory logger, IFileUploader fileUploader, IMapper mapper,
+            IRealTimeUpdater pusher)
         {
             this._fileUploader = fileUploader;
             this._logger = logger.CreateLogger<UrlProcessService>();
@@ -47,13 +44,8 @@ namespace PodNoms.Api.Services.Processor.Hangfire
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
-            var options = new PusherOptions();
-            options.Cluster = config["Pusher:Cluster"];
-            this._pusher = new Pusher(
-                config["Pusher:AppId"],
-                config["Pusher:Key"],
-                config["Pusher:Secret"],
-                options);
+            this._pusher = pusher;
+
         }
         #region Internals
         private async Task<bool> _sendPusherUpdate(PodcastEntry entry)
@@ -66,11 +58,10 @@ namespace PodNoms.Api.Services.Processor.Hangfire
         {
             try
             {
-                var ITriggerOptions = await _pusher.TriggerAsync(
+                return await _pusher.SendMessage(
                     $"{uid}__process_podcast",
                     message,
                     data);
-                return true;
             }
             catch (Exception ex)
             {

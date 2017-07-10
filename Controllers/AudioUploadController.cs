@@ -46,7 +46,7 @@ namespace PodNoms.Api.Controllers
             podcast.PodcastEntries.Add(new PodcastEntry
             {
                 AudioUrl = audioUrl,
-                Title = Path.GetFileName(file.FileName),
+                Title = Path.GetFileName(Path.GetFileNameWithoutExtension(file.FileName)),
                 ImageUrl = $"{_storageSettings.CdnUrl}static/images/default-entry.png",
                 Processed = true,
                 ProcessingStatus = ProcessingStatus.Processed
