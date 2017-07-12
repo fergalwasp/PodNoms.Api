@@ -153,7 +153,7 @@ namespace PodNoms.Api
 
             GlobalConfiguration.Configuration.UseActivator(new ServiceProviderActivator(serviceProvider));
 
-            if (env.IsProduction() || true)
+            if (env.IsProduction() || false)
             {
                 app.UseHangfireServer();
                 app.UseHangfireDashboard();
