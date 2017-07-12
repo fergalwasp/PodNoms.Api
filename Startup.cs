@@ -145,7 +145,6 @@ namespace PodNoms.Api
             using (var context = new PodnomsDbContext(
                 app.ApplicationServices.GetRequiredService<DbContextOptions<PodnomsDbContext>>()))
             {
-                context.Database.EnsureCreated();
                 context.Database.Migrate();
             }
             Console.WriteLine("Successfully migrated");

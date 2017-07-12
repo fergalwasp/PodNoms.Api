@@ -1,4 +1,4 @@
-FROM microsoft/aspnetcore:2.0
+FROM microsoft/aspnetcore:2.0.0-preview2
 ENV ASPNETCORE_URLS=http://+:5000
 RUN echo "deb http://http.debian.net/debian jessie-backports main contrib non-free" >> /etc/apt/sources.list
 
