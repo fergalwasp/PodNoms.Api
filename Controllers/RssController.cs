@@ -34,6 +34,8 @@ namespace PodNoms.Api.Controllers
         }
         private static string CleanInvalidXmlChars(string text, float xmlVersion = 1.1f)
         {
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
             const string patternVersion1_0 = @"&#x((10?|[2-F])FFF[EF]|FDD[0-9A-F]|7F|8[0-46-9A-F]9[0-9A-F]);";
             const string patternVersion1_1 = @"&#x((10?|[2-F])FFF[EF]|FDD[0-9A-F]|[19][0-9A-F]|7F|8[0-46-9A-F]|0?[1-8BCEF]);";
             string Pattern = xmlVersion == 1.0f ? patternVersion1_0 : patternVersion1_1;
@@ -53,10 +55,13 @@ namespace PodNoms.Api.Controllers
         [Produces("application/xml")]
         public async Task<IActionResult> Get(string slug)
         {
+            _logger.LogDebug("RSS: Retrieving podcast");
             var podcast = await _repository.GetAsync(slug);
             if (podcast != null)
             {
+                _logger.LogDebug("RSS: Found podcast");
                 string xml = ResourceReader.ReadResource("podcast.xml", _logger);
+                _logger.LogDebug($"RSS: {xml}");
                 var template = Handlebars.Compile(xml);
 
                 var compiled = new PodcastEnclosureViewModel
