@@ -21,7 +21,7 @@ namespace PodNoms.Api.Providers
                     e => e.MapFrom(m => $"{this._options.GetSection("App")["RssUrl"]}{m.Slug}"))
                 .ForMember(
                     e => e.ImageUrl,
-                    e => e.MapFrom(m => $"{this._options.GetSection("Storage")["CdnUrl"]}{m.ImageUrl}"));
+                    e => e.MapFrom(m => m.ImageUrl.StartsWith("data:image") ? m.ImageUrl : $"{this._options.GetSection("Storage")["CdnUrl"]}{m.ImageUrl}"));
 
             CreateMap<PodcastEntry, EntryViewModel>()
                 .ForMember(
